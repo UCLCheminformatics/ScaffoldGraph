@@ -1,0 +1,41 @@
+package:
+  name: ScaffoldGraph
+  version: 0.1.0
+
+source:
+  path: .
+
+build:
+  number: 0
+  script: $PYTHON setup.py install --record=/tmp/record.txt
+  script: "%PYTHON%" setup.py install
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+    - rdkit
+    - networkx
+    - scipy
+    - pandas
+    - tqdm
+    - loguru
+    - pytest
+
+  test:
+    imports:
+      - scaffoldgraph
+
+    requires:
+      - pytest
+      - coverage
+      - pytest-cov
+
+about:
+  home: https://github.com/uclcheminformatics/scaffoldgraph
+  license: MIT
+  summary: ScaffoldGraph is an open-source library, for generating scaffold networks and scaffold trees.
+

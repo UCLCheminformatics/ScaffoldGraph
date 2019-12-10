@@ -1,0 +1,6 @@
+rdkit
+networkx
+tqdm
+loguru
+scipy
+pandas
