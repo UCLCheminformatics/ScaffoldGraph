@@ -1,6 +1,7 @@
 """
 scaffoldgraph.analysis.cse
 """
+
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from itertools import repeat
