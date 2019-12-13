@@ -60,7 +60,7 @@ class ScaffoldRuleSet(object):
             return parents.pop()
         remaining = list(parents)
         for rule in self:
-            filtered = rule.filter(child, parents)
+            filtered = rule.filter(child, remaining)
             if filtered:
                 remaining = filtered
             if len(remaining) == 1:
