@@ -1,14 +1,13 @@
 package:
-  name: ScaffoldGraph
+  name: scaffoldgraph
   version: 0.1.0
 
 source:
-  path: .
+  path: ../
 
 build:
   number: 0
-  script: $PYTHON setup.py install --record=/tmp/record.txt
-  script: "%PYTHON%" setup.py install
+  script: "$PYTHON setup.py install --single-version-externally-managed --record=/tmp/record.txt"
 
 requirements:
   build:
