@@ -283,7 +283,7 @@ def get_scaffold_frags(frag):
         # but log it for reference.
         # This behaviour may be desirable for a scaffold tree and is
         # equivalent to the behavior of SNG (I believe...)
-        # logger.debug()
+        # logger.debug(e)
         return set()
     frags = {Scaffold(f) for f in GetMolFrags(frag, True, False)}
     return frags
@@ -392,7 +392,9 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
     else:
         fragmenter = MurckoRingSystemFragmenter()
 
-    scaffold = Scaffold(get_murcko_scaffold(mol))
+    mol = get_murcko_scaffold(mol)
+    rdmolops.RemoveStereochemistry(mol)
+    scaffold = Scaffold(mol)
     parents = {scaffold}
 
     def recursive_generation(child):
