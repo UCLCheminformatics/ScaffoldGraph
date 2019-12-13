@@ -1,4 +1,4 @@
-[![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/uclcheminformatics/scaffoldgraph)
+[![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/uclcheminformatics/scaffoldgraph#contributing)
 
 # &#9004; ScaffoldGraph  &#9004;
 
