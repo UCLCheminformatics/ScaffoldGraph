@@ -56,7 +56,7 @@ benchmark test.
 
 ### Install with conda (recommended)
 ```
-conda install -c uclcheminformatics scaffoldgraph
+conda install -c UCLCheminformatics scaffoldgraph
 ```
 ### Install with pip
 ```
