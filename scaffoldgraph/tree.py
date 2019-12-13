@@ -3,6 +3,7 @@ scaffoldgraph.tree
 """
 
 from rdkit import RDLogger
+from rdkit.Chem import rdmolops
 
 from .core import ScaffoldGraph, Scaffold, MurckoRingFragmenter
 from .core.fragment import get_murcko_scaffold
@@ -64,6 +65,7 @@ def tree_frags_from_mol(mol, prioritization_rules=None):
 
     rdlogger.setLevel(4)
     scaffold = Scaffold(get_murcko_scaffold(mol))
+    rdmolops.RemoveStereochemistry(scaffold.mol)
     parents = [scaffold]
     fragmenter = MurckoRingFragmenter(use_scheme_4=True)
     rules = prioritization_rules if prioritization_rules else original_ruleset

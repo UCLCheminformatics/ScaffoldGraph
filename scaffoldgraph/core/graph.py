@@ -11,7 +11,7 @@ import tqdm
 from loguru import logger
 from networkx import DiGraph
 from rdkit import RDLogger
-from rdkit.Chem import rdMolHash, MolToSmiles
+from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
@@ -66,6 +66,7 @@ class ScaffoldGraph(DiGraph, ABC):
                 name = molecule.GetProp('_Name')
                 logger.warning(f'Molecule {name} filtered (> {ring_cutoff} rings)')
                 continue
+            rdmolops.RemoveStereochemistry(molecule)
             scaffold = Scaffold(get_murcko_scaffold(molecule))
             if scaffold:  # Checks that a scaffold has at least 1 atom
                 if annotate:
