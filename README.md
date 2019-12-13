@@ -150,54 +150,54 @@ Where "command" is one of: tree, network, hiers, aggregate or select.
 
     - ##### Smiles Format:
     
-        ScaffoldGraph expects a delimited file where the first column defines a SMILES string, followed by a molecule
-        identifier. If an identifier is not specified the program will use a hash of the molecule as an identifier.
+    ScaffoldGraph expects a delimited file where the first column defines a SMILES string, followed by a molecule
+    identifier. If an identifier is not specified the program will use a hash of the molecule as an identifier.
         
-        Example SMILES file:
+    Example SMILES file:
         
-        ```csv
-        CCN1CCc2c(C1)sc(NC(=O)Nc3ccc(Cl)cc3)c2C#N   CHEMBL4116520
-        CC(N1CC(C1)Oc2ccc(Cl)cc2)C3=Nc4c(cnn4C5CCOCC5)C(=O)N3   CHEMBL3990718
-        CN(C\C=C\c1ccc(cc1)C(F)(F)F)Cc2coc3ccccc23  CHEMBL4116665
-        N=C1N(C(=Nc2ccccc12)c3ccccc3)c4ccc5OCOc5c4  CHEMBL4116261
-        ...
-        ```
+    ```csv
+    CCN1CCc2c(C1)sc(NC(=O)Nc3ccc(Cl)cc3)c2C#N   CHEMBL4116520
+    CC(N1CC(C1)Oc2ccc(Cl)cc2)C3=Nc4c(cnn4C5CCOCC5)C(=O)N3   CHEMBL3990718
+    CN(C\C=C\c1ccc(cc1)C(F)(F)F)Cc2coc3ccccc23  CHEMBL4116665
+    N=C1N(C(=Nc2ccccc12)c3ccccc3)c4ccc5OCOc5c4  CHEMBL4116261
+    ...
+    ```
     
     - ##### SDF Format:
     
-        ScaffoldGraph expects an [SDF](https://en.wikipedia.org/wiki/Chemical_table_file) file, where the molecule
-        identifier is specified in the title line. If the title line is blank, then a hash of the molecule
-        will be used as an identifier.
+    ScaffoldGraph expects an [SDF](https://en.wikipedia.org/wiki/Chemical_table_file) file, where the molecule
+    identifier is specified in the title line. If the title line is blank, then a hash of the molecule
+    will be used as an identifier.
        
-        Note: selecting subsets of a graph will not be possible if a name is not supplied 
+    Note: selecting subsets of a graph will not be possible if a name is not supplied 
         
-- #### Output Formats
+- ### Output Formats
 
     - ##### TSV Format (default)
     
-        The generate commands (network, hiers, tree) produce an intermediate tsv containing 4 columns:
+    The generate commands (network, hiers, tree) produce an intermediate tsv containing 4 columns:
         
-        1) Number of rings (hierarchy)
-        2) Scaffold SMILES
-        3) Sub-scaffold SMILES
-        4) Molecule ID(s) (top-level scaffolds (Murcko))
+    1) Number of rings (hierarchy)
+    2) Scaffold SMILES
+    3) Sub-scaffold SMILES
+    4) Molecule ID(s) (top-level scaffolds (Murcko))
 
-        The aggregate command produces a tsv containing 4 columns
+    The aggregate command produces a tsv containing 4 columns
         
-        1) Scaffold ID
-        2) Number of rings (hierarchy)
-        3) Scaffold SMILES
-        4) Sub-scaffold IDs
+    1) Scaffold ID
+    2) Number of rings (hierarchy)
+    3) Scaffold SMILES
+    4) Sub-scaffold IDs
     
     - ##### SDF Format
     
-        An SDF file can be produced by the aggregate and select commands. This SDF is 
-        formatted according to the SDF specification with added property fields:
+    An SDF file can be produced by the aggregate and select commands. This SDF is 
+    formatted according to the SDF specification with added property fields:
         
-        1) TITLE field = scaffold ID
-        2) SUBSCAFFOLDS field = list of sub-scaffold IDs
-        3) HIERARCHY field = number of rings
-        4) SMILES field = scaffold canonical SMILES   
+    1) TITLE field = scaffold ID
+    2) SUBSCAFFOLDS field = list of sub-scaffold IDs
+    3) HIERARCHY field = number of rings
+    4) SMILES field = scaffold canonical SMILES   
   
   
 --------------------------------------------------------------------------------
@@ -250,8 +250,79 @@ tree = sg.ScaffoldTree.from_smiles('my_smiles_file.smi')
     
 - **Creating custom scaffold prioritisation rules**
 
-TODO
+    If required a user can define their own rules for prioritizing scaffolds during scaffold tree construction.
+    Rules can be defined by subclassing one of four rule classes:
+    
+    BaseScaffoldFilterRule, ScaffoldFilterRule, ScaffoldMinFilterRule or ScaffoldMaxFilterRule
+    
+    When subclassing a name property must be defined and either a condition, get_property or filter function.
+    Examples are shown below:
+    
+    ```python
+    import scaffoldgraph as sg
+    from scaffoldgraph.prioritization import *
+    
+    """
+    Scaffold filter rule (must implement name and condition)
+    The filter will retain all scaffolds which return a True condition
+    """
+  
+    class CustomRule01(ScaffoldFilterRule):
+        """Do not remove rings with >= 12 atoms if there are smaller rings to remove"""
+  
+        def condition(self, child, parent):
+              removed_ring = child.rings[parent.removed_ring_idx]
+              return removed_ring.size < 12
+            
+        @property
+        def name(self):
+            return 'custom rule 01'
+          
+    """
+    Scaffold min/max filter rule (must implement name and get_property)
+    The filter will retain all scaffolds with the min/max property value
+    """
+  
+    class CustomRule02(ScaffoldMinFilterRule):
+        """Smaller rings are removed first"""
+  
+        def get_property(self, child, parent):
+              return child.rings[parent.removed_ring_idx].size
+            
+        @property
+        def name(self):
+            return 'custom rule 02'
+        
+      
+    """
+    Scaffold base filter rule (must implement name and filter)
+    The filter method must return a list of filtered parent scaffolds
+    This rule is used when a more complex rule is required, this example
+    defines a tiebreaker rule. Only one scaffold must be left at the end
+    of all filter rules in a rule set
+    """
+  
+    class CustomRule03(BaseScaffoldFilterRule):
+        """Tie-breaker rule (alphabetical)"""
 
+        def filter(self, child, parents):
+            return [sorted(parents, key=lambda p: p.smiles)[0]]
+
+        @property
+        def name(self):
+            return 'cutstom rule 03'  
+    ```
+    
+    Custom rules can subsequently be added to a rule set and supplied to the scaffold tree constructor:
+    
+    ```python
+    ruleset = ScaffoldRuleSet(name='custom rules')
+    ruleset.add_rule(CustomRule01())
+    ruleset.add_rule(CustomRule02())
+    ruleset.add_rule(CustomRule03())
+  
+    graph = sg.ScaffoldTree.from_sdf('my_sdf_file.sdf', prioritization_rules=ruleset)
+    ```
 
 --------------------------------------------------------------------------------
 
@@ -292,4 +363,6 @@ ScaffoldGraph uses Travis CI for continuous integration
 * Bemis, G. W. and Murcko, M. A. (1996). The properties of known drugs. 1. molecular frameworks. Journal of Medicinal Chemistry, 39(15), 2887–2893.
 * Schuffenhauer, A., Ertl, P., Roggo, S., Wetzel, S., Koch, M. A., and Waldmann, H. (2007). The scaffold tree visualization of the scaffold universe by hierarchical scaffold classification. Journal of Chemical Information and Modeling, 47(1), 47–58. PMID: 17238248.
 * Varin, T., Schuffenhauer, A., Ertl, P., and Renner, S. (2011). Mining for bioactive scaffolds with scaffold networks: Improved compound set enrichment from primary screening data. Journal of Chemical Information and Modeling, 51(7), 1528–1538.
+* Varin, T., Gubler, H., Parker, C., Zhang, J., Raman, P., Ertl, P. and Schuffenhauer, A. (2010) Compound Set Enrichment: A Novel Approach to Analysis of Primary HTS Data. Journal of Chemical Information and Modeling, 50(12), 2067-2078.
 * Wetzel, S., Klein, K., Renner, S., Rennerauh, D., Oprea, T. I., Mutzel, P., and Waldmann, H. (2009). Interactive exploration of chemical space with scaffold hunter. Nat Chem Biol, 1875(8), 581–583.
+* Wilkens, J., Janes, J. and Su, A. (2005). HierS:  Hierarchical Scaffold Clustering Using Topological Chemical Graphs. Journal of Medicinal Chemistry, 48(9), 3182-3193.
