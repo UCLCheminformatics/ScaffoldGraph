@@ -13,9 +13,9 @@ export PATH="$HOME/miniconda/bin:$PATH"
 conda config --set always_yes yes --set changeps1 no
 conda update -q conda
 conda info -a
-conda config --add channels oliverbscott
+conda config --add channels conda-forge
 conda create -q -n travis_env python=$TRAVIS_PYTHON_VERSION
-conda activate travis_env
+source activate travis_env
 
 # Install
 conda install --file $TRAVIS_BUILD_DIR/requirements.txt
