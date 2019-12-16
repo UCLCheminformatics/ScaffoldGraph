@@ -36,6 +36,12 @@ def test_base_rule_subclass():
     parents = [0, 1, 2, 3, 4]
     assert mock.name == 'mock'
     assert str(mock) == 'mock'
-    assert mock.filter == [1, 2, 3, 4]
-    assert mock(parents) == mock.filter(parents)
+    assert mock.filter(None, parents) == [1, 2, 3, 4]
+    assert mock(None, parents) == mock.filter(None, parents)
     assert repr(mock) == '<MockScaffoldFilterRule at {}>'.format(hex(id(mock)))
+
+
+def test_subclassing():
+    assert issubclass(ScaffoldFilterRule, BaseScaffoldFilterRule)
+    assert issubclass(ScaffoldMaxFilterRule, BaseScaffoldFilterRule)
+    assert issubclass(ScaffoldMinFilterRule, BaseScaffoldFilterRule)
