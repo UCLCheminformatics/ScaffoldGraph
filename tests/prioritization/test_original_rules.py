@@ -375,21 +375,21 @@ def test_scheme_18():
     the seven membered diazepinenone ring remaining is equal for all four molecules.
     """
 
-    d = 'CN1C(=O)CN=C(C2=C1C=CC(=C2)Cl)C3=CC=CC=C3'  # Diazepam
+    d = 'CN1C(=O)CN=C(C2=C1C=CC(=C2)Cl)C3=CC=CC=C3'   # Diazepam
     b = 'C1C(=O)NC2=C(C=C(C=C2)Br)C(=N1)C3=CC=CC=N3'  # Bromazepam
-    z = 'CC1=NN(C2=C1C(=NCC(=O)N2C)C3=CC=CC=C3F)C'  # Zolazepam
-    c = 'CCC1=CC2=C(S1)N(C(=O)CN=C2C3=CC=CC=C3Cl)C'  # Clotiazepam
+    z = 'CC1=NN(C2=C1C(=NCC(=O)N2C)C3=CC=CC=C3F)C'    # Zolazepam
+    c = 'CCC1=CC2=C(S1)N(C(=O)CN=C2C3=CC=CC=C3Cl)C'   # Clotiazepam
 
-    original_results = [  # MOLECULES              |  # HIERARCHY
-        canon('O=C1CN=C(c2ccccc2)c2ccccc2N1'),  # Diazepam (murcko)      |  (3)
-        canon('O=C1CN=Cc2ccccc2N1'),  # Diazepam + Bromazepam  |  (2)
-        canon('O=C1CN=C(c2ccccn2)c2ccccc2N1'),  # Bromazepam (murcko)    |  (3)
+    original_results = [                          # MOLECULES              |  # HIERARCHY
+        canon('O=C1CN=C(c2ccccc2)c2ccccc2N1'),    # Diazepam (murcko)      |  (3)
+        canon('O=C1CN=Cc2ccccc2N1'),              # Diazepam + Bromazepam  |  (2)
+        canon('O=C1CN=C(c2ccccn2)c2ccccc2N1'),    # Bromazepam (murcko)    |  (3)
         canon('O=C1CN=C(c2ccccc2)c2cn[nH]c2N1'),  # Zolazepam  (murcko)    |  (3)
-        canon('O=C1CN=Cc2cn[nH]c2N1'),  # Zolazepam              |  (2)
-        canon('O=C1CN=C(c2ccccc2)c2ccsc2N1'),  # Clotiazepam (murcko)   |  (3)
-        canon('O=C1CN=Cc2ccsc2N1'),  # Clotiazepam            |  (2)
-        canon('O=C1CN=CC=CN1'),  # ALL                    |  (1)
-        # < TOTAL: 8 > #
+        canon('O=C1CN=Cc2cn[nH]c2N1'),            # Zolazepam              |  (2)
+        canon('O=C1CN=C(c2ccccc2)c2ccsc2N1'),     # Clotiazepam (murcko)   |  (3)
+        canon('O=C1CN=Cc2ccsc2N1'),               # Clotiazepam            |  (2)
+        canon('O=C1CN=CC=CN1'),                   # ALL                    |  (1)
+                                                  # < TOTAL: 8 > #
     ]
 
     molecules = [Chem.MolFromSmiles(x) for x in [d, b, z, c]]
