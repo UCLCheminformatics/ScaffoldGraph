@@ -7,6 +7,8 @@ import pytest
 
 import scaffoldgraph as sg
 
+from . import mock_sdf, mock_smiles_file
+
 
 @pytest.fixture(name='test_tree')
 def test_tree_graph(sdf_file):

@@ -3,10 +3,10 @@ scaffoldgraph tests.analysis.test_cse
 """
 
 import random
-
 import scaffoldgraph as sg
-from scaffoldgraph.analysis import CSE
 
+from scaffoldgraph.analysis import CSE
+from .. import mock_sdf
 
 def test_cse(sdf_file):
     network = sg.ScaffoldNetwork.from_sdf(sdf_file)

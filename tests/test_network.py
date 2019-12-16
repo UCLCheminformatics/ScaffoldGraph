@@ -6,6 +6,8 @@ import pytest
 
 import scaffoldgraph as sg
 
+from . import mock_sdf, mock_smiles_file
+
 
 @pytest.fixture(name='test_net')
 def test_network(sdf_file):
