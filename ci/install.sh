@@ -19,5 +19,4 @@ source activate travis_env
 
 # Install
 conda install --file $TRAVIS_BUILD_DIR/requirements.txt
-conda install --file $TRAVIS_BUILD_DIR/test_requirements.txt
 python $TRAVIS_BUILD_DIR/setup.py install
