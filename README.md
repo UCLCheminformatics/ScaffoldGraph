@@ -1,5 +1,8 @@
+[![Conda](https://anaconda.org/uclcheminformatics/scaffoldgraph/badges/installer/conda.svg)](https://anaconda.org/UCLCheminformatics/scaffoldgraph)
+[![Release](https://img.shields.io/pypi/v/scaffoldgraph.svg?style=flat-square)](https://github.com/UCLCheminformatics/ScaffoldGraph/releases)
 [![Build Status](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph.svg?branch=master)](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph)
 [![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/uclcheminformatics/scaffoldgraph#contributing)
+
 
 # &#9004; ScaffoldGraph  &#9004;
 
