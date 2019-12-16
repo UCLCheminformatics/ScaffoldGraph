@@ -123,8 +123,9 @@ class CSE(object):
                 self._X.update({f[1]: {'PVAL': p, 'KS': k}})
 
     def _fit_binom(self, activity, p):
+        activity = ((x[0], [x[1].count(1), x[1].count(0)]) for x in activity)
         scaffolds, activity = zip(*activity)
-        func = partial(self._hyp, p=self._p, alternative=self._alt)
+        func = partial(self._hyp, n=None, p=self._p, alternative=self._alt)
         with ProcessPoolExecutor(self._n_jobs) as pool:
             for f in tqdm.tqdm(zip(pool.map(func, activity), scaffolds),
                                total=len(scaffolds), disable=p is False):
@@ -150,10 +151,12 @@ class CSE(object):
 
         df = pd.DataFrame()
         x = sorted(self._X, key=lambda x: self._X[x]['PVAL'])
-        scaffolds = x[:top_n]
+        scaffolds = x[:top_n] if len(x) >= top_n else x
         df['SCAFFOLD'] = scaffolds
         df['PVAL'] = [self._X[s]['PVAL'] for s in scaffolds]
         df['CRIT'] = [self._X[s]['CRIT'] for s in scaffolds]
+
+        return df
 
     def __getitem__(self, item):
         return self._X[item]
