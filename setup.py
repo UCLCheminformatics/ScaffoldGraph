@@ -5,7 +5,7 @@ scaffoldgraph setup
 from setuptools import setup, find_packages
 
 __version__ = '1.0.0'
-url = 'https://github.com/OliverBScott/scaffoldgraph'
+url = 'https://github.com/UCLCheminformatics/scaffoldgraph'
 
 description = 'ScaffoldGraph is an open-source cheminformatics library, built using RDKit and \
 NetworkX for generating scaffold networks and scaffold trees.'
