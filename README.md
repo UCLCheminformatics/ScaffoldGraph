@@ -349,7 +349,7 @@ ScaffoldGraphs testing is located under `test/`. Run all tests using:
 $ python setup.py test
 ```
 
-or run an individual test: `pytest --no-cov test/tree`
+or run an individual test: `pytest --no-cov tests/core`
 
 When contributing new features please include appropriate test files
 
