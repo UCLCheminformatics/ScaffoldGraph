@@ -60,11 +60,12 @@ benchmark test.
 
 ### Install with conda (recommended)
 ```
-conda install -c UCLCheminformatics scaffoldgraph
+conda config --add channels conda-forge
+conda install -c uclcheminformatics scaffoldgraph
 ```
 ### Install with pip
 ```
-pip install ScaffoldGraph
+pip install scaffoldgraph
 ```
 __Warning__: rdkit cannot be installed with pip, so must be installed through [other means]('https://www.rdkit.org/docs/Install.html')
 
