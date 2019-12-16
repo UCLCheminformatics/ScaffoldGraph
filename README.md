@@ -61,7 +61,7 @@ conda install -c UCLCheminformatics scaffoldgraph
 ```
 ### Install with pip
 ```
-pip install scaffoldgraph
+pip install ScaffoldGraph
 ```
 __Warning__: rdkit cannot be installed with pip, so must be installed through [other means]('https://www.rdkit.org/docs/Install.html')
 
