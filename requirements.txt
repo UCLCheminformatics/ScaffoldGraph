@@ -4,3 +4,4 @@ tqdm
 loguru
 scipy
 pandas
+pytest
