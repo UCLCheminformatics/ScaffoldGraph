@@ -343,6 +343,8 @@ def get_annotated_murcko_scaffold(mol, scaffold=None, as_mol=True):
     annotated = rdmolops.ReplaceSidechains(mol, scaffold)
     if as_mol:
         return annotated
+    if annotated is None:
+        return ''
     return MolToSmiles(annotated)
 
 
