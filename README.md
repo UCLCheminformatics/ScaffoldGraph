@@ -2,7 +2,7 @@
 [![Release](https://img.shields.io/pypi/v/scaffoldgraph.svg?style=flat-square)](https://github.com/UCLCheminformatics/ScaffoldGraph/releases)
 [![Build Status](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph.svg?branch=master)](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph)
 [![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/uclcheminformatics/scaffoldgraph#contributing)
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/UCLCheminformatics/ScaffoldGraph/blob/master/LICENSE)
 
 # &#9004; ScaffoldGraph  &#9004;
 
