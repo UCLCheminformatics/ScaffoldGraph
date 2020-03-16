@@ -377,6 +377,7 @@ ScaffoldGraph uses Travis CI for continuous integration
 ## References
 
 * Bemis, G. W. and Murcko, M. A. (1996). The properties of known drugs. 1. molecular frameworks. Journal of Medicinal Chemistry, 39(15), 2887–2893.
+* Matlock, M., Zaretzki, J., Swamidass, J. S. (2013). Scaffold network generator: a tool for mining molecular structures. Bioinformatics, 29(20), 2655-2656
 * Schuffenhauer, A., Ertl, P., Roggo, S., Wetzel, S., Koch, M. A., and Waldmann, H. (2007). The scaffold tree visualization of the scaffold universe by hierarchical scaffold classification. Journal of Chemical Information and Modeling, 47(1), 47–58. PMID: 17238248.
 * Varin, T., Schuffenhauer, A., Ertl, P., and Renner, S. (2011). Mining for bioactive scaffolds with scaffold networks: Improved compound set enrichment from primary screening data. Journal of Chemical Information and Modeling, 51(7), 1528–1538.
 * Varin, T., Gubler, H., Parker, C., Zhang, J., Raman, P., Ertl, P. and Schuffenhauer, A. (2010) Compound Set Enrichment: A Novel Approach to Analysis of Primary HTS Data. Journal of Chemical Information and Modeling, 50(12), 2067-2078.
