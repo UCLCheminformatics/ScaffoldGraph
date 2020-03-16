@@ -8,7 +8,11 @@
 
 **ScaffoldGraph** is an open-source cheminformatics library, built using [RDKit](https://www.rdkit.org/) and
 [NetworkX](https://networkx.github.io/), for the generation and analysis of scaffold networks and scaffold trees.
- 
+
+<p align="center">
+    <img width="80%", src="https://github.com/UCLCheminformatics/ScaffoldGraph/blob/master/img/scaffoldgraph.jpg?raw=true" />
+</p>
+
 ## Features
 
 * **Scaffold Network generation** (Varin, 2011)
@@ -100,7 +104,7 @@ Where "command" is one of: tree, network, hiers, aggregate or select.
     
     ```console
     $ scaffoldgraph network file_1.sdf file_1.tmp
-    $ scaffoldgraph network file_2.sdf file_1.tmp
+    $ scaffoldgraph network file_2.sdf file_2.tmp
     ```
     
     Further options:
