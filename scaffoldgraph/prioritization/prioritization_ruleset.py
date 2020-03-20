@@ -57,7 +57,9 @@ class ScaffoldRuleSet(object):
         if len(parents) == 0:
             raise ValueError('No parent scaffolds supplied to filter')
         elif len(parents) == 1:
-            return parents.pop()
+            parent = parents.pop()
+            parent.prioritization_rule = 'last remaining'
+            return parent
         remaining = list(parents)
         for rule in self:
             filtered = rule.filter(child, remaining)
