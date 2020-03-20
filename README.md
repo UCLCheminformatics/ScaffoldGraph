@@ -244,25 +244,25 @@ tree = sg.ScaffoldTree.from_smiles('my_smiles_file.smi')
     It is simple to construct a graph from multiple input source in parallel,
     using the concurrent.futures module and the sg.utils.aggregate function.
     
-    ```python
-    from concurrent.futures import ProcessPoolExecutor
-    from functools import partial
-    import scaffoldgraph as sg
-    import os
-  
-    directory = './data'
-    sdf_files = [f for f in os.listdir(directory) if f.endswith('.sdf')]
-  
-    func = partial(sg.ScaffoldNetwork.from_sdf, ring_cutoff=10)
-    
-    graphs = []
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        futures = executor.map(func, sdf_files)
-        for future in futures:
-            graphs.append(future)
-    
-    network = sg.utils.aggregate(graphs)
-    ```
+  ```python
+  from concurrent.futures import ProcessPoolExecutor
+  from functools import partial
+  import scaffoldgraph as sg
+  import os
+      
+  directory = './data'
+  sdf_files = [f for f in os.listdir(directory) if f.endswith('.sdf')]
+      
+  func = partial(sg.ScaffoldNetwork.from_sdf, ring_cutoff=10)
+        
+  graphs = []
+  with ProcessPoolExecutor(max_workers=4) as executor:
+      futures = executor.map(func, sdf_files)
+      for future in futures:
+          graphs.append(future)
+        
+  network = sg.utils.aggregate(graphs)
+  ```
     
 - **Creating custom scaffold prioritisation rules**
 
@@ -274,71 +274,71 @@ tree = sg.ScaffoldTree.from_smiles('my_smiles_file.smi')
     When subclassing a name property must be defined and either a condition, get_property or filter function.
     Examples are shown below:
     
-    ```python
-    import scaffoldgraph as sg
-    from scaffoldgraph.prioritization import *
+  ```python
+  import scaffoldgraph as sg
+  from scaffoldgraph.prioritization import *
     
-    """
-    Scaffold filter rule (must implement name and condition)
-    The filter will retain all scaffolds which return a True condition
-    """
+  """
+  Scaffold filter rule (must implement name and condition)
+  The filter will retain all scaffolds which return a True condition
+  """
   
-    class CustomRule01(ScaffoldFilterRule):
-        """Do not remove rings with >= 12 atoms if there are smaller rings to remove"""
+  class CustomRule01(ScaffoldFilterRule):
+      """Do not remove rings with >= 12 atoms if there are smaller rings to remove"""
   
-        def condition(self, child, parent):
-              removed_ring = child.rings[parent.removed_ring_idx]
-              return removed_ring.size < 12
+      def condition(self, child, parent):
+          removed_ring = child.rings[parent.removed_ring_idx]
+          return removed_ring.size < 12
             
-        @property
-        def name(self):
-            return 'custom rule 01'
+      @property
+      def name(self):
+          return 'custom rule 01'
           
-    """
-    Scaffold min/max filter rule (must implement name and get_property)
-    The filter will retain all scaffolds with the min/max property value
-    """
-  
-    class CustomRule02(ScaffoldMinFilterRule):
-        """Smaller rings are removed first"""
-  
-        def get_property(self, child, parent):
-              return child.rings[parent.removed_ring_idx].size
+  """
+  Scaffold min/max filter rule (must implement name and get_property)
+  The filter will retain all scaffolds with the min/max property value
+  """
+    
+  class CustomRule02(ScaffoldMinFilterRule):
+      """Smaller rings are removed first"""
+    
+      def get_property(self, child, parent):
+          return child.rings[parent.removed_ring_idx].size
             
-        @property
-        def name(self):
-            return 'custom rule 02'
+      @property
+      def name(self):
+          return 'custom rule 02'
         
       
-    """
-    Scaffold base filter rule (must implement name and filter)
-    The filter method must return a list of filtered parent scaffolds
-    This rule is used when a more complex rule is required, this example
-    defines a tiebreaker rule. Only one scaffold must be left at the end
-    of all filter rules in a rule set
-    """
-  
-    class CustomRule03(BaseScaffoldFilterRule):
-        """Tie-breaker rule (alphabetical)"""
-
-        def filter(self, child, parents):
-            return [sorted(parents, key=lambda p: p.smiles)[0]]
-
-        @property
-        def name(self):
-            return 'cutstom rule 03'  
-    ```
+  """
+  Scaffold base filter rule (must implement name and filter)
+  The filter method must return a list of filtered parent scaffolds
+  This rule is used when a more complex rule is required, this example
+  defines a tiebreaker rule. Only one scaffold must be left at the end
+  of all filter rules in a rule set
+  """
     
-    Custom rules can subsequently be added to a rule set and supplied to the scaffold tree constructor:
+  class CustomRule03(BaseScaffoldFilterRule):
+      """Tie-breaker rule (alphabetical)"""
     
-    ```python
-    ruleset = ScaffoldRuleSet(name='custom rules')
-    ruleset.add_rule(CustomRule01())
-    ruleset.add_rule(CustomRule02())
-    ruleset.add_rule(CustomRule03())
+      def filter(self, child, parents):
+          return [sorted(parents, key=lambda p: p.smiles)[0]]
     
-    graph = sg.ScaffoldTree.from_sdf('my_sdf_file.sdf', prioritization_rules=ruleset)
-    ```
+      @property
+      def name(self):
+          return 'cutstom rule 03'  
+  ```
+    
+   Custom rules can subsequently be added to a rule set and supplied to the scaffold tree constructor:
+    
+   ```python
+  ruleset = ScaffoldRuleSet(name='custom rules')
+  ruleset.add_rule(CustomRule01())
+  ruleset.add_rule(CustomRule02())
+  ruleset.add_rule(CustomRule03())
+    
+  graph = sg.ScaffoldTree.from_sdf('my_sdf_file.sdf', prioritization_rules=ruleset)
+  ```
 
 --------------------------------------------------------------------------------
 
