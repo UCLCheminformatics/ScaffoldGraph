@@ -108,7 +108,7 @@ class Scaffold(object):
     @prioritization_rule.setter
     def prioritization_rule(self, value):
         """Sets the prioritization rule used to select this scaffold"""
-        self.mol.SetProp('prioritization', str(value))
+        self.mol.SetProp('prioritization_rule', str(value))
 
     @property
     def removed_ring_idx(self):
