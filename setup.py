@@ -11,8 +11,11 @@ description = 'ScaffoldGraph is an open-source cheminformatics library, built us
 NetworkX for generating scaffold networks and scaffold trees.'
 
 with open('requirements.txt') as f:
-    install_requires = [l.strip() for l in f]
+    install_requires = [line.strip() for line in f]
     install_requires.remove('rdkit')
+
+with open('README.md', encoding='utf-8') as f:
+    long_description = f.read()
 
 setup_requires = ['pytest-runner']
 tests_require = ['pytest', 'pytest-cov']
@@ -27,6 +30,8 @@ setup(
     name='ScaffoldGraph',
     version=__version__,
     description=description,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     author='Oliver Scott',
     author_email='oliver.scott.17@ucl.ac.uk',
     url=url,
