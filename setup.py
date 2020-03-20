@@ -4,7 +4,7 @@ scaffoldgraph setup
 
 from setuptools import setup, find_packages
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 url = 'https://github.com/UCLCheminformatics/scaffoldgraph'
 
 description = 'ScaffoldGraph is an open-source cheminformatics library, built using RDKit and \
