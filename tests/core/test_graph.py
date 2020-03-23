@@ -17,5 +17,5 @@ def test_init_molecule_name():
 
 
 def test_graph_subclass():
-    assert issubclass(ScaffoldGraph, DiGraph)
+    assert issubclass(ScaffoldGraph, nx.DiGraph)
     assert issubclass(ScaffoldGraph, ABC)
