@@ -17,6 +17,7 @@
 [Features](https://github.com/UCLCheminformatics/ScaffoldGraph#features) | 
 [Installation](https://github.com/UCLCheminformatics/ScaffoldGraph#installation) |
 [Quick-start](https://github.com/UCLCheminformatics/ScaffoldGraph#quick-start) |
+[Examples](https://github.com/UCLCheminformatics/ScaffoldGraph/tree/master/examples) |
 [Contributing](https://github.com/UCLCheminformatics/ScaffoldGraph#contributing) |
 [References](https://github.com/UCLCheminformatics/ScaffoldGraph#references) |
 [Citation](https://github.com/UCLCheminformatics/ScaffoldGraph#citation)
@@ -87,7 +88,7 @@ __Warning__: rdkit cannot be installed with pip, so must be installed through [o
 
 ### CLI usage
 
-The ScaffoldGraph CLI is almost analagous to SNG consisting of a two step process (Generate --> Aggregate).
+The ScaffoldGraph CLI is almost analogous to SNG consisting of a two step process (Generate --> Aggregate).
 
 ScaffoldGraph can be invoked from the command-line using the following command:
 
@@ -223,6 +224,9 @@ Where "command" is one of: tree, network, hiers, aggregate or select.
 
 ScaffoldGraph makes it simple to construct a graph using the library API.
 The resultant graphs follow the same API as a NetworkX DiGraph.
+
+Some [example](https://github.com/UCLCheminformatics/ScaffoldGraph/tree/master/examples) 
+notebooks can be found in the 'examples' directory.
 
 ```python
 import scaffoldgraph as sg
