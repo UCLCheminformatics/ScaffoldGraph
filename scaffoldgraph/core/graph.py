@@ -8,13 +8,15 @@ from abc import ABC, abstractmethod
 from collections import Counter
 
 import tqdm
+import networkx as nx
+
 from loguru import logger
-from networkx import DiGraph
 from rdkit import RDLogger
 from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
+from scaffoldgraph.utils import canonize_smiles
 from .fragment import get_murcko_scaffold, get_annotated_murcko_scaffold
 from .scaffold import Scaffold
 
@@ -28,7 +30,7 @@ def init_molecule_name(mol):
         mol.SetProp('_Name', n)
 
 
-class ScaffoldGraph(DiGraph, ABC):
+class ScaffoldGraph(nx.DiGraph, ABC):
     """Abstract base class for ScaffoldGraphs"""
 
     def __init__(self, graph=None, fragmenter=None):
@@ -92,28 +94,124 @@ class ScaffoldGraph(DiGraph, ABC):
     @property
     def num_scaffold_nodes(self):
         """Return the number of scaffolds in the graph"""
-        return len(list(self.get_scaffold_nodes()))
+        count = 0
+        for _ in self.get_scaffold_nodes():
+            count += 1
+        return count
 
     @property
     def num_molecule_nodes(self):
         """Return the number of molecules in the graph"""
-        return len(list(self.get_molecule_nodes()))
+        count = 0
+        for _ in self.get_molecule_nodes():
+            count += 1
+        return count
 
     def get_scaffold_nodes(self, data=False):
+        """Return a generator of all scaffold nodes in the graph"""
         if data is True:
             return ((n, self.nodes[n]) for n, d in self.nodes(data='type') if d == 'scaffold')
         else:
             return (n for n, d in self.nodes(data='type') if d == 'scaffold')
 
     def get_molecule_nodes(self, data=False):
+        """Return a generator of all molecule nodes in the graph"""
         if data is True:
             return ((n, self.nodes[n]) for n, d in self.nodes(data='type') if d == 'molecule')
         else:
             return (n for n, d in self.nodes(data='type') if d == 'molecule')
 
     def get_hierarchy_sizes(self):
+        """Return a collections.Counter object indicating the number of scaffolds
+        within each hierarchy level"""
         hierarchy = (d['hierarchy'] for _, d in self.get_scaffold_nodes(data=True))
         return Counter(hierarchy)
+
+    def max_hierarchy(self):
+        """Return the largest hierarchy level"""
+        return max(self.get_hierarchy_sizes())
+
+    def min_hierarchy(self):
+        """Return the smallest hierarchy level"""
+        return min(self.get_hierarchy_sizes())
+
+    def get_scaffolds_in_hierarchy(self, hierarchy):
+        """Return a generator of all scaffolds within a specified hierarchy"""
+        for s, d in self.get_scaffold_nodes(data=True):
+            if d['hierarchy'] == int(hierarchy):
+                yield s
+
+    def scaffold_in_graph(self, scaffold_smiles):
+        """Returns True if specified scaffold SMILES is in the scaffold graph
+
+        Parameters
+        ----------
+        scaffold_smiles : (str) SMILES of query scaffold.
+        """
+        result = scaffold_smiles in self
+        if result is not True:
+            scaffold_smiles = canonize_smiles(scaffold_smiles, failsafe=True)
+            result = scaffold_smiles in self
+        return result
+
+    def molecule_in_graph(self, molecule_id):
+        """Returns True if specified molecule ID is in the scaffold graph
+
+        Parameters
+        ----------
+        molecule_id: (str) ID of query molecule.
+        """
+        return str(molecule_id) in self
+
+    def get_molecules_for_scaffold(self, scaffold_smiles):
+        """Return a list of molecule IDs which are represented by a scaffold in the graph.
+
+        Note: This is determined by traversing the graph. In the case of a scaffold tree
+        the results represent the rules used to prioritize the scaffolds.
+
+        Parameters
+        ----------
+        scaffold_smiles : (str) SMILES of query scaffold.
+        """
+        molecules = []
+        if scaffold_smiles not in self:
+            scaffold_smiles = canonize_smiles(scaffold_smiles, failsafe=True)
+            if scaffold_smiles not in self:
+                return molecules
+        for succ in nx.bfs_tree(self, scaffold_smiles, reverse=False):
+            if self.nodes[succ]['type'] == 'molecule':
+                molecules.append(succ)
+        return molecules
+
+    def get_scaffolds_for_molecule(self, molecule_id):
+        """Return a list of scaffold SMILES connected to a query molecule ID
+
+        Parameters
+        ----------
+        molecule_id: (str) ID of query molecule.
+        """
+        scaffolds = []
+        if molecule_id not in self:
+            return scaffolds
+        for succ in nx.bfs_tree(self, molecule_id, reverse=True):
+            if self.nodes[succ]['type'] == 'scaffold':
+                scaffolds.append(succ)
+        return scaffolds
+
+    def separate_disconnected_components(self, sort=False):
+        """Separate disconnected components into distinct ScaffoldGraph objects.
+
+        Parameters
+        ----------
+        sort: if True sort components in descending order according
+            to the number of nodes in the subgraph.
+        """
+        components = []
+        for c in nx.weakly_connected_components(self):
+            components.append(self.subgraph(c).copy())
+        if sort:
+            return sorted(components, key=len, reverse=True)
+        return components
 
     def add_molecule_node(self, molecule, **attr):
         name = molecule.GetProp('_Name')
