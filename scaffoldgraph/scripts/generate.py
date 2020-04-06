@@ -37,9 +37,9 @@ def network_cli(args):
     fmt = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = ScaffoldNetwork.from_sdf(args.input, args.max_rings, progress=args.silent is False)
+        sg = ScaffoldNetwork.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     elif fmt == 'SMI':
-        sg = ScaffoldNetwork.from_smiles_file(args.input, args.max_rings, progress=args.silent is False)
+        sg = ScaffoldNetwork.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:
         raise ValueError('input file format not currently supported')
 
@@ -61,9 +61,9 @@ def hiers_cli(args):
     fmt = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = HierS.from_sdf(args.input, args.max_rings, progress=args.silent is False)
+        sg = HierS.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     elif fmt == 'SMI':
-        sg = HierS.from_smiles_file(args.input, args.max_rings, progress=args.silent is False)
+        sg = HierS.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:
         raise ValueError('input file format not currently supported')
 
@@ -85,9 +85,9 @@ def tree_cli(args):
     fmt = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = ScaffoldTree.from_sdf(args.input, args.max_rings, progress=args.silent is False)
+        sg = ScaffoldTree.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     elif fmt == 'SMI':
-        sg = ScaffoldTree.from_smiles_file(args.input, args.max_rings, progress=args.silent is False)
+        sg = ScaffoldTree.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:
         raise ValueError('input file format not currently supported')
 
