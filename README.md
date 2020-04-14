@@ -331,7 +331,7 @@ tree = sg.ScaffoldTree.from_smiles('my_smiles_file.smi')
     
       @property
       def name(self):
-          return 'cutstom rule 03'  
+          return 'custom rule 03'  
   ```
     
    Custom rules can subsequently be added to a rule set and supplied to the scaffold tree constructor:
@@ -393,4 +393,20 @@ ScaffoldGraph uses Travis CI for continuous integration
 
 ## Citation
 
-Pending...
+If you use this software in your own work please cite our [paper](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btaa219/5814205),
+and the respective papers of the methods used.
+
+```
+@article{10.1093/bioinformatics/btaa219,
+    author = {Scott, Oliver B and Chan, A W Edith},
+    title = "{ScaffoldGraph: an open-source library for the generation and analysis of molecular scaffold networks and scaffold trees}",
+    journal = {Bioinformatics},
+    year = {2020},
+    month = {03},
+    issn = {1367-4803},
+    doi = {10.1093/bioinformatics/btaa219},
+    url = {https://doi.org/10.1093/bioinformatics/btaa219},
+    note = {btaa219}
+    eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btaa219/32984904/btaa219.pdf},
+}
+```
