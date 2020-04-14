@@ -3,6 +3,7 @@ scaffoldgraph.io.dataframe
 """
 
 from rdkit.Chem import MolFromSmiles
+from loguru import logger
 
 
 class DataFrameMolSupplier(object):
@@ -24,8 +25,8 @@ class DataFrameMolSupplier(object):
             mol.SetProp('_Name', str(name))
 
         except AttributeError:
-            logger.warning('Molecule {} could not be parsed'.format(
-                self.cursor
+            logger.warning('Molecule {} : {} could not be parsed'.format(
+                self.cursor, smiles
             ))
             self.cursor += 1
             return None
