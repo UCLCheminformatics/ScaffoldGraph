@@ -24,7 +24,7 @@ class ScaffoldTree(ScaffoldGraph):
     """
 
     def __init__(self, graph=None, prioritization_rules=None):
-        super(ScaffoldTree, self).__init__(graph, MurckoRingFragmenter(True))
+        super(ScaffoldTree, self).__init__(graph, MurckoRingFragmenter(True), 'tree')
         self.rules = prioritization_rules if prioritization_rules else original_ruleset
 
     def _recursive_constructor(self, child):

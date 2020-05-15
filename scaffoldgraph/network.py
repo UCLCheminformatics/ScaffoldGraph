@@ -18,7 +18,7 @@ class ScaffoldNetwork(ScaffoldGraph):
     """
 
     def __init__(self, graph=None):
-        super(ScaffoldNetwork, self).__init__(graph, MurckoRingFragmenter())
+        super(ScaffoldNetwork, self).__init__(graph, MurckoRingFragmenter(), 'network')
 
     def _recursive_constructor(self, child):
         parents = (p for p in self.fragmenter.fragment(child) if p)
@@ -49,7 +49,7 @@ class HierS(ScaffoldGraph):
     """
 
     def __init__(self, graph=None):
-        super(HierS, self).__init__(graph, MurckoRingSystemFragmenter())
+        super(HierS, self).__init__(graph, MurckoRingSystemFragmenter(), 'hiers')
 
     def _recursive_constructor(self, child):
         parents = (p for p in self.fragmenter.fragment(child) if p)
