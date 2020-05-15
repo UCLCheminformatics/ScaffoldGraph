@@ -52,6 +52,9 @@ def configure_logger(verbosity):
     elif verbosity == 4:
         tqdm_handler['sink'].level = logging.DEBUG
         tqdm_handler['level'] = 'DEBUG'
+    else:  # if < 0 or > 4 is supplied set logger to max level (DEBUG)
+        tqdm_handler['sink'].level = logging.DEBUG
+        tqdm_handler['level'] = 'DEBUG'
 
     config["handlers"].append(tqdm_handler)
     logger.configure(**config)
