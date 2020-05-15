@@ -7,10 +7,11 @@ Defines the base class for scaffold graphs in ScaffoldGraph
 from abc import ABC, abstractmethod
 from collections import Counter
 
-import tqdm
 import networkx as nx
 
 from loguru import logger
+from tqdm.auto import tqdm
+
 from rdkit import RDLogger
 from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
@@ -33,15 +34,18 @@ def init_molecule_name(mol):
 class ScaffoldGraph(nx.DiGraph, ABC):
     """Abstract base class for ScaffoldGraphs"""
 
-    def __init__(self, graph=None, fragmenter=None):
+    def __init__(self, graph=None, fragmenter=None, graph_type=None):
         """
         Initialize a ScaffoldGraph object
 
         Parameters
         ----------
         graph: Graph data to inherit (optional, default=None)
+        fragmenter: fragmenter class for producing the next scaffold hierarchy
+            of a given molecular input with fragmenter.fragment(input)
+        graph_type: the type of graph being constructed (graph attribute)
         """
-        super(ScaffoldGraph, self).__init__(graph)
+        super(ScaffoldGraph, self).__init__(graph, graph_type=graph_type)
         self.fragmenter = fragmenter
 
     def _construct(self, molecules, ring_cutoff=10, progress=False, annotate=True):
@@ -60,7 +64,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         rdlogger.setLevel(4)  # Suppress the RDKit logs
         progress = progress is False
         desc = self.__class__.__name__
-        for molecule in tqdm.tqdm(molecules, disable=progress, desc=desc, miniters=1, dynamic_ncols=True):
+        for molecule in tqdm(molecules, disable=progress, desc=desc, miniters=1, dynamic_ncols=True):
             if molecule is None:  # logged in suppliers
                 continue
             init_molecule_name(molecule)
