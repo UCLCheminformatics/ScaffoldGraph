@@ -111,19 +111,23 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             count += 1
         return count
 
-    def get_scaffold_nodes(self, data=False):
+    def get_scaffold_nodes(self, data=False, default=None):
         """Return a generator of all scaffold nodes in the graph"""
-        if data is True:
+        if data is False:
+            return (n for n, d in self.nodes(data='type') if d == 'scaffold')
+        elif data is True:
             return ((n, self.nodes[n]) for n, d in self.nodes(data='type') if d == 'scaffold')
         else:
-            return (n for n, d in self.nodes(data='type') if d == 'scaffold')
+            return ((n, self.nodes[n].get(data, default)) for n, d in self.nodes(data='type') if d == 'scaffold')
 
-    def get_molecule_nodes(self, data=False):
+    def get_molecule_nodes(self, data=False, default=None):
         """Return a generator of all molecule nodes in the graph"""
-        if data is True:
+        if data is False:
+            return (n for n, d in self.nodes(data='type') if d == 'molecule')
+        elif data is True:
             return ((n, self.nodes[n]) for n, d in self.nodes(data='type') if d == 'molecule')
         else:
-            return (n for n, d in self.nodes(data='type') if d == 'molecule')
+            return ((n, self.nodes[n].get(data, default)) for n, d in self.nodes(data='type') if d == 'molecule')
 
     def get_hierarchy_sizes(self):
         """Return a collections.Counter object indicating the number of scaffolds
@@ -146,7 +150,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
                 yield s
 
     def scaffold_in_graph(self, scaffold_smiles):
-        """Returns True if specified scaffold SMILES is in the scaffold graph
+        """Returns True if specified scaffold SMILES is in the scaffold graph.
 
         Parameters
         ----------
@@ -159,7 +163,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         return result
 
     def molecule_in_graph(self, molecule_id):
-        """Returns True if specified molecule ID is in the scaffold graph
+        """Returns True if specified molecule ID is in the scaffold graph.
 
         Parameters
         ----------
@@ -167,7 +171,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         """
         return str(molecule_id) in self
 
-    def get_molecules_for_scaffold(self, scaffold_smiles):
+    def get_molecules_for_scaffold(self, scaffold_smiles, data=False, default=None):
         """Return a list of molecule IDs which are represented by a scaffold in the graph.
 
         Note: This is determined by traversing the graph. In the case of a scaffold tree
@@ -175,7 +179,12 @@ class ScaffoldGraph(nx.DiGraph, ABC):
 
         Parameters
         ----------
-        scaffold_smiles : (str) SMILES of query scaffold.
+        scaffold_smiles : (string) SMILES of query scaffold.
+        data : (string or bool, optional (default=False)) The molecule node attribute returned in 2-tuple
+            (n, dict[data]). If True, return entire molecule node attribute dict as (n, dict).
+            If False, return just the molecule nodes n.
+        default : (value, optional (default=None)) Value used for molecule nodes that don’t have the
+            requested attribute. Only relevant if data is not True or False.
         """
         molecules = []
         if scaffold_smiles not in self:
@@ -183,31 +192,112 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             if scaffold_smiles not in self:
                 return molecules
         for succ in nx.bfs_tree(self, scaffold_smiles, reverse=False):
-            if self.nodes[succ]['type'] == 'molecule':
-                molecules.append(succ)
+            if self.nodes[succ].get('type') == 'molecule':
+                if data is False:
+                    molecules.append(succ)
+                elif data is True:
+                    molecules.append((succ, self.nodes[succ]))
+                else:
+                    molecules.append((succ, self.nodes[succ].get(data, default)))
         return molecules
 
-    def get_scaffolds_for_molecule(self, molecule_id):
-        """Return a list of scaffold SMILES connected to a query molecule ID
+    def get_scaffolds_for_molecule(self, molecule_id, data=False, default=None):
+        """Return a list of scaffold SMILES connected to a query molecule ID.
 
         Parameters
         ----------
-        molecule_id: (str) ID of query molecule.
+        molecule_id: (string) ID of query molecule.
+        data : (string or bool, optional (default=False)) The scaffold node attribute returned in 2-tuple
+            (n, dict[data]). If True, return entire scaffold node attribute dict as (n, dict).
+            If False, return just the scaffold nodes n.
+        default : (value, optional (default=None)) Value used for scaffold nodes that don’t have the
+            requested attribute. Only relevant if data is not True or False.
         """
         scaffolds = []
         if molecule_id not in self:
             return scaffolds
         for succ in nx.bfs_tree(self, molecule_id, reverse=True):
-            if self.nodes[succ]['type'] == 'scaffold':
-                scaffolds.append(succ)
+            if self.nodes[succ].get('type') == 'scaffold':
+                if data is False:
+                    scaffolds.append(succ)
+                elif data is True:
+                    scaffolds.append((succ, self.nodes[succ]))
+                else:
+                    scaffolds.append((succ, self.nodes[succ].get(data, default)))
         return scaffolds
+
+    def get_parent_scaffolds(self, scaffold_smiles, data=False, default=None, max_levels=-1):
+        """Return a list of parent scaffolds for a query scaffold.
+
+        Parameters
+        ----------
+        scaffold_smiles : (string)  SMILES of query scaffold.
+        data : (string or bool, optional (default=False)) The scaffold node attribute returned in 2-tuple
+            (n, dict[data]). If True, return entire scaffold node attribute dict as (n, dict).
+            If False, return just the scaffold nodes n.
+        default : (value, optional (default=None)) Value used for scaffold nodes that don’t have the
+            requested attribute. Only relevant if data is not True or False.
+        max_levels : (integer, optional (default=-1)) If > 0 only return scaffolds with a hierarchy
+            difference to the query scaffold of max_levels.
+        """
+        parents = []
+        if scaffold_smiles not in self:
+            scaffold_smiles = canonize_smiles(scaffold_smiles, failsafe=True)
+            if scaffold_smiles not in self:
+                return parents
+        level = self.nodes[scaffold_smiles].get('hierarchy', float('inf'))
+        bfs = iter(nx.bfs_tree(self, scaffold_smiles, reverse=True).nodes)
+        next(bfs)  # first entry is the query node
+        for succ in bfs:
+            d = self.nodes[succ]
+            if d.get('type') == 'scaffold' and (max_levels < 0 or level - d.get('hierarchy', 0) <= max_levels):
+                if data is False:
+                    parents.append(succ)
+                elif data is True:
+                    parents.append((succ, self.nodes[succ]))
+                else:
+                    parents.append((succ, self.nodes[succ].get(data, default)))
+        return parents
+
+    def get_child_scaffolds(self, scaffold_smiles, data=False, default=None, max_levels=-1):
+        """Return a list of child scaffolds for a query scaffold.
+
+        Parameters
+        ----------
+        scaffold_smiles : (string)  SMILES of query scaffold.
+        data : (string or bool, optional (default=False)) The scaffold node attribute returned in 2-tuple
+            (n, dict[data]). If True, return entire scaffold node attribute dict as (n, dict).
+            If False, return just the scaffold nodes n.
+        default : (value, optional (default=None)) Value used for scaffold nodes that don’t have the
+            requested attribute. Only relevant if data is not True or False.
+        max_levels : (integer, optional (default=-1)) If > 0 only return scaffolds with a hierarchy
+            difference to the query scaffold of max_levels.
+        """
+        children = []
+        if scaffold_smiles not in self:
+            scaffold_smiles = canonize_smiles(scaffold_smiles, failsafe=True)
+            if scaffold_smiles not in self:
+                return children
+        level = self.nodes[scaffold_smiles].get('hierarchy', float('inf'))
+        bfs = iter(nx.bfs_tree(self, scaffold_smiles, reverse=False).nodes)
+        next(bfs)  # first entry is the query node
+        for succ in bfs:
+            d = self.nodes[succ]
+            if d.get('type') == 'scaffold' and (max_levels < 0 or d.get('hierarchy', 0) - level <= max_levels):
+                if data is False:
+                    children.append(succ)
+                elif data is True:
+                    children.append((succ, self.nodes[succ]))
+                else:
+                    children.append((succ, self.nodes[succ].get(data, default)))
+        return children
 
     def separate_disconnected_components(self, sort=False):
         """Separate disconnected components into distinct ScaffoldGraph objects.
 
         Parameters
         ----------
-        sort: if True sort components in descending order according
+        sort : (bool, optional (default=False)) If True sort components in descending order according
             to the number of nodes in the subgraph.
         """
         components = []
