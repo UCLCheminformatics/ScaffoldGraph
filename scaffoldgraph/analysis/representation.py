@@ -15,6 +15,7 @@ from rdkit import Chem
 
 
 class Cache(OrderedDict):
+    """A basic implementation of an LRU cache using OrderedDict"""
 
     def __init__(self, maxsize=None, *args, **kwargs):
         self._maxsize = maxsize
@@ -43,6 +44,8 @@ class Cache(OrderedDict):
 
 
 class MolecularSimilarityCache(object):
+
+    __slots__ = ('_fp_func', '_sim_func', '_fp_cache', '_sim_cache')
 
     def __init__(self, fp_func=None, sim_func=None, fp_cache_maxsize=None, sim_cache_maxsize=None):
         self._fp_func = fp_func if fp_func else Chem.RDKFingerprint
