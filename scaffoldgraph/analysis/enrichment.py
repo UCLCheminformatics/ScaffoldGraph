@@ -104,7 +104,7 @@ def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='gre
 
     Returns
     -------
-    A tuple of 'enriched' scaffold classes
+    A tuple of 'enriched' scaffold classes in the format: (scaffold, {data})
 
     Notes
     -----
