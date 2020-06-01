@@ -1,5 +1,6 @@
 """
 scaffoldgraph.core.scaffold
+
 A module defining scaffold objects used in ScaffoldGraph
 """
 

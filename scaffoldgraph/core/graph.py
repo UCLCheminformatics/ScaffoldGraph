@@ -149,6 +149,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             if d['hierarchy'] == int(hierarchy):
                 yield s
 
+    # TODO: only return True if type == scaffold
     def scaffold_in_graph(self, scaffold_smiles):
         """Returns True if specified scaffold SMILES is in the scaffold graph.
 
@@ -160,7 +161,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         if result is not True:
             scaffold_smiles = canonize_smiles(scaffold_smiles, failsafe=True)
             result = scaffold_smiles in self
-        return result
+        return result and self.nodes[scaffold_smiles]['type'] == 'scaffold'
 
     def molecule_in_graph(self, molecule_id):
         """Returns True if specified molecule ID is in the scaffold graph.
@@ -169,7 +170,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         ----------
         molecule_id: (str) ID of query molecule.
         """
-        return str(molecule_id) in self
+        return str(molecule_id) in self and self.nodes[molecule_id]['type'] == 'molecule'
 
     def get_molecules_for_scaffold(self, scaffold_smiles, data=False, default=None):
         """Return a list of molecule IDs which are represented by a scaffold in the graph.
