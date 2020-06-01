@@ -71,7 +71,6 @@ def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='gr
     -------
     A dict of dicts in the format {scaffold: {pval}} where pval is the calculated p-value
     """
-
     if mode == 'binomial' or mode == 'b':
         return _btp(scaffoldgraph, activity, alternative)
     elif mode == 'ks' or mode == 'k':
