@@ -214,15 +214,14 @@ def get_over_represented_scaffold_classes(scaffoldgraph, threshold=0.80, member_
     ----------
     scaffoldgraph : (ScaffoldGraph)
     threshold : (float, optional (default=0.80))
-        Similarity threshold used to define potential
-        over-represented scaffolds.
+        Similarity threshold used to define potential over-represented scaffolds.
     member_cutoff : (int or None, optional (default=None))
         If set, scaffolds for which (member_cutoff <= member molecules) are not considered
         to be over-represented (not significant).
     skip_aps : (bool, optional (default=False))
         If True function assumes that the APS has already been calculated and 'members' and
-        'aps' are scaffold node attributes (i.e. use if running the same function more than once
-        with different thresholds).
+        'aps' are scaffold node attributes (i.e. use if running the same function more than
+         once with different thresholds).
     **kwargs :
         Arguments for the calc_average_pairwise_similarity function (calculating the APS metric)
 

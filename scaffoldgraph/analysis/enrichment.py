@@ -106,6 +106,10 @@ def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='gre
     -------
     A tuple of 'enriched' scaffold classes
 
+    Notes
+    -----
+    P-values are added as node attributes with the key 'pval'
+
     References
     ----------
     .. [1] Varin, T., Schuffenhauer, A., Ertl, P., and Renner, S. (2011). Mining for bioactive scaffolds
