@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph.svg?branch=master)](https://travis-ci.org/UCLCheminformatics/ScaffoldGraph)
 [![Contributing](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/uclcheminformatics/scaffoldgraph#contributing)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/UCLCheminformatics/ScaffoldGraph/blob/master/LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.1093%2Fbioinformatics%2Fbtaa219-blue)](https://doi.org/10.1093/bioinformatics/btaa219)
 
 # &#9004; ScaffoldGraph  &#9004;
 
