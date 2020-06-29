@@ -17,4 +17,6 @@ __all__ = [
     'MurckoRingFragmenter',
     'MurckoRingSystemFragmenter',
     'get_all_murcko_fragments',
+    'get_next_murcko_fragments',
+    'get_murcko_scaffold',
 ]

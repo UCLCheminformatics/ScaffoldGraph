@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 
 import networkx as nx
+import gzip
 
 from loguru import logger
 from tqdm.auto import tqdm
@@ -242,7 +243,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
                       **default_attr)
 
     @classmethod
-    def from_sdf(cls, file_name, ring_cutoff=10, progress=False, annotate=True, **kwargs):
+    def from_sdf(cls, file_name, ring_cutoff=10, progress=False, annotate=True, zipped=False, **kwargs):
         """Construct a scaffoldgraph from an SDF file.
 
         Parameters
@@ -252,13 +253,18 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         progress (bool): if True show a progress bar to monitor construction progress (default: False)
         annotate: if True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold)
+        zipped (bool): if True input file is compressed with gzip
         kwargs: arguments to pass to the scaffoldgraph __init__
         """
 
-        with open(file_name, 'rb') as sdf:
-            supplier = read_sdf(sdf, requires_length=progress is True)
-            instance = cls(**kwargs)
-            instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        if zipped:
+            sdf = gzip.open(file_name, 'rb')
+        else:
+            sdf = open(file_name, 'rb')
+        supplier = read_sdf(sdf, requires_length=progress is True)
+        instance = cls(**kwargs)
+        instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        sdf.close()
         return instance
 
     @classmethod
