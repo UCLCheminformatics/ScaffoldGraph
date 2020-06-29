@@ -34,10 +34,11 @@ def network_cli(args):
         print(start_message.format(command='Network', input=args.input,
                                    output=args.output, max_r=args.max_rings))
     logger.info('Generating Scaffold Network...')
-    fmt = file_format(args.input)
+    fmt, zipped = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = ScaffoldNetwork.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
+        sg = ScaffoldNetwork.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False,
+                                      zipped=zipped)
     elif fmt == 'SMI':
         sg = ScaffoldNetwork.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:
@@ -58,10 +59,10 @@ def hiers_cli(args):
         print(start_message.format(command='HierS', input=args.input,
                                    output=args.output, max_r=args.max_rings))
     logger.info('Generating HierS Scaffold Network...')
-    fmt = file_format(args.input)
+    fmt, zipped = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = HierS.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
+        sg = HierS.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False, zipped=zipped)
     elif fmt == 'SMI':
         sg = HierS.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:
@@ -82,10 +83,11 @@ def tree_cli(args):
         print(start_message.format(command='Tree', input=args.input,
                                    output=args.output, max_r=args.max_rings))
     logger.info('Generating Scaffold Tree...')
-    fmt = file_format(args.input)
+    fmt, zipped = file_format(args.input)
     start = time.time()
     if fmt == 'SDF':
-        sg = ScaffoldTree.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
+        sg = ScaffoldTree.from_sdf(args.input, ring_cutoff=args.max_rings, progress=args.silent is False,
+                                   zipped=zipped)
     elif fmt == 'SMI':
         sg = ScaffoldTree.from_smiles_file(args.input, ring_cutoff=args.max_rings, progress=args.silent is False)
     else:

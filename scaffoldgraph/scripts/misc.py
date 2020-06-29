@@ -27,12 +27,16 @@ class TqdmHandler(logging.Handler):
 
 def file_format(path):
     """Determine an input file format from a path."""
-    _, extension = os.path.splitext(path)
+    split_path, extension = os.path.splitext(path)
     if extension == '.sdf':
-        return 'SDF'
+        return 'SDF', False
     elif extension == '.smi':
-        return 'SMI'
-    elif extension == '.pkl' or extension == '.pickle':
-        return 'PKL'
+        return 'SMI', False
+    elif extension == '.gz' or extension == '.gzip':
+        new_extension = file_format(split_path)
+        if new_extension[0] is not None:
+            return new_extension[0], True
+        else:
+            return None, False
     else:
-        return None
+        return None, False
