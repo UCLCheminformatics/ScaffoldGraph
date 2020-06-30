@@ -9,7 +9,7 @@ import logging
 import sys
 
 from scaffoldgraph import __version__
-from .generate import *
+from .generate import generate_cli
 from .misc import TqdmHandler
 from .operations import *
 
@@ -81,7 +81,6 @@ def generate_parent_parser():
 
 def scaffoldgraph_args():
     """ Defines CLI utility for ScaffoldGraph."""
-
     parser = argparse.ArgumentParser('scaffoldgraph', description=desc)
     parser.add_argument('--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='command', dest='command')
@@ -89,20 +88,20 @@ def scaffoldgraph_args():
     # network (generate a scaffold network from a SMILES or SDF file)
     network_parser = subparsers.add_parser('network', description='Generate a scaffold network',
                                            parents=[generate_parent_parser(), parent_parser()])
-    network_parser.set_defaults(func=network_cli)
+    network_parser.set_defaults(func=generate_cli)
 
     # HierS (generate a HierS scaffold network from a SMILES or SDF file)
     hiers_parser = subparsers.add_parser('hiers', description='Generate a HierS type scaffold network',
                                          parents=[generate_parent_parser(), parent_parser()])
-    hiers_parser.set_defaults(func=hiers_cli)
+    hiers_parser.set_defaults(func=generate_cli)
 
     # tree (generate a scaffold tree form a SMILES or SDF file)
     tree_parser = subparsers.add_parser('tree', description='Generate a scaffold tree',
                                         parents=[generate_parent_parser(), parent_parser()])
-    tree_parser.set_defaults(func=tree_cli)
+    tree_parser.set_defaults(func=generate_cli)
 
     # select (select a subgraph of a scaffold graph using a molecular query)
-    select_parser = subparsers.add_parser('select', description="Select subgraph from a molecular query.",
+    select_parser = subparsers.add_parser('select', description='Select subgraph from a molecular query.',
                                           parents=[parent_parser()])
     select_parser.add_argument('input_graph', help='input aggregated graph file')
     select_parser.add_argument('input_query', help='input query file (SDF, SMILES)')
