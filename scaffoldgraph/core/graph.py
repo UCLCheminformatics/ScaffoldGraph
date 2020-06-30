@@ -76,10 +76,9 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             rdmolops.RemoveStereochemistry(molecule)
             scaffold = Scaffold(get_murcko_scaffold(molecule))
             if scaffold:  # Checks that a scaffold has at least 1 atom
+                annotation = None
                 if annotate:
                     annotation = get_annotated_murcko_scaffold(molecule, scaffold.mol, False)
-                else:
-                    annotation = None
                 self.add_scaffold_node(scaffold)
                 self.add_molecule_node(molecule)
                 self.add_molecule_edge(molecule, scaffold, annotation=annotation)
@@ -311,6 +310,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
     def add_molecule_node(self, molecule, **attr):
         name = molecule.GetProp('_Name')
         default_attr = dict(type='molecule', smiles=MolToSmiles(molecule))
+        default_attr.update(molecule.GetPropsAsDict())
         default_attr.update(attr)
         self.add_node(name, **default_attr)
 
