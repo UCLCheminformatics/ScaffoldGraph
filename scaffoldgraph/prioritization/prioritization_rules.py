@@ -7,6 +7,13 @@ Implements abstract rules for scaffold prioritization when constructing scaffold
 from abc import ABCMeta, abstractmethod
 from itertools import compress
 
+__all__ = [
+    'BaseScaffoldFilterRule',
+    'ScaffoldFilterRule',
+    'ScaffoldMaxFilterRule',
+    'ScaffoldMinFilterRule',
+]
+
 
 class BaseScaffoldFilterRule(metaclass=ABCMeta):
     """Abstract base class for defining rules for scaffold prioritization.

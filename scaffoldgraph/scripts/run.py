@@ -8,10 +8,12 @@ import argparse
 import logging
 import sys
 
+from loguru import logger
+
 from scaffoldgraph import __version__
 from .generate import generate_cli
 from .misc import TqdmHandler
-from .operations import *
+from .operations import select_cli, aggregate_cli
 
 title = f"ScaffoldGraph {__version__}"
 desc = "Generate Scaffold Networks and Scaffold Trees."

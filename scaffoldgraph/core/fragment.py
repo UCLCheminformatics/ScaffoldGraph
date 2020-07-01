@@ -4,6 +4,8 @@ scaffoldgraph.core.fragment
 
 from abc import ABC, abstractmethod
 
+from loguru import logger
+
 from rdkit import RDLogger
 from rdkit.Chem import (
     RWMol,
@@ -261,7 +263,6 @@ def collect_linker_atoms(origin, remove_atoms):
                         remove_atoms.add(origin_atom.GetIdx())
                         correct_atom_props(other_atom)
                         visited.add(bond_id)
-        pass
 
     # Linker is recursively collected
     # Linker atoms are added to the existing set 'remove_atoms'
@@ -283,7 +284,7 @@ def get_scaffold_frags(frag):
         # but log it for reference.
         # This behaviour may be desirable for a scaffold tree and is
         # equivalent to the behavior of SNG (I believe...)
-        # logger.debug(e)
+        logger.debug(e)
         return set()
     frags = {Scaffold(f) for f in GetMolFrags(frag, True, False)}
     return frags
