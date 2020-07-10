@@ -7,10 +7,26 @@ from loguru import logger
 
 
 class DataFrameMolSupplier(object):
-    """"""
+    """Class supplying rdkit Mols from a pandas DataFrame."""
 
-    def __init__(self, df, smiles_column, name_column):
-        self.supplier = zip(df[smiles_column].values, df[name_column].values)
+    def __init__(self, df, smiles_column, name_column, data_cols=None):
+        """Initialize DataFrameMolSupplier
+
+        Parameters
+        ----------
+        """
+        self.data_cols = data_cols
+        if data_cols is None:
+            self.supplier = zip(
+                df[smiles_column].values,
+                df[name_column].values
+            )
+        else:
+            self.supplier = zip(
+                df[smiles_column].values,
+                df[name_column].values,
+                df[data_cols].values
+            )
         self.n = len(df[smiles_column])
         self.cursor = 1
 
@@ -18,15 +34,16 @@ class DataFrameMolSupplier(object):
         return self
 
     def __next__(self):
-        smiles, name = next(self.supplier)
-
+        values = next(self.supplier)
         try:
-            mol = MolFromSmiles(smiles)
-            mol.SetProp('_Name', str(name))
-
+            mol = MolFromSmiles(values[0])
+            mol.SetProp('_Name', str(values[1]))
+            if self.data_cols is not None:
+                for key, value in zip(self.data_cols, values[2]):
+                    mol.SetProp(str(key), str(value))
         except AttributeError:
             logger.warning('Molecule {} : {} could not be parsed'.format(
-                self.cursor, smiles
+                self.cursor, values[0]
             ))
             self.cursor += 1
             return None
@@ -38,7 +55,7 @@ class DataFrameMolSupplier(object):
         return self.n
 
 
-def read_dataframe(df, smiles_column, name_column):
+def read_dataframe(df, smiles_column, name_column, data_columns=None):
     """Read molecules from a dataframe.
 
     Parameters
@@ -48,4 +65,4 @@ def read_dataframe(df, smiles_column, name_column):
     -------
     DataFrameMolSupplier
     """
-    return DataFrameMolSupplier(df, smiles_column, name_column)
+    return DataFrameMolSupplier(df, smiles_column, name_column, data_columns)

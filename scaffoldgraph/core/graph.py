@@ -403,8 +403,8 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         return instance
 
     @classmethod
-    def from_dataframe(cls, df, smiles_column='Smiles', name_column='Name', ring_cutoff=10,
-                       progress=False, annotate=True, **kwargs):
+    def from_dataframe(cls, df, smiles_column='Smiles', name_column='Name', data_columns=None,
+                       ring_cutoff=10, progress=False, annotate=True, **kwargs):
         """Construct a scaffoldgraph from a pandas DataFrame.
 
         Parameters
@@ -412,13 +412,14 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         df (pd.DataFrame): a pandas DataFrame containing SMILES strings and a molecule identifier
         smiles_column (str): label of column containing SMILES strings (default: 'Smiles')
         name_column (str): label of column containing SMILES strings (default: 'Name')
+        data_columns (list): list of column keys to be included in the molecule node attributes
         ring_cutoff (int): ignore molecules with more rings than this cutoff (default: 10)
         progress (bool): if True show a progress bar to monitor construction progress (default: False)
         annotate: if True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold)
         """
 
-        supplier = read_dataframe(df, smiles_column, name_column)
+        supplier = read_dataframe(df, smiles_column, name_column, data_columns)
         instance = cls(**kwargs)
         instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
         return instance
