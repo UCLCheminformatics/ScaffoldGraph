@@ -9,6 +9,7 @@ Using Topological Chemical Graphs'
 from networkx import set_node_attributes
 from collections import OrderedDict
 from itertools import combinations
+from operator import eq as _eq
 
 from rdkit import DataStructs
 from rdkit import Chem
@@ -35,6 +36,11 @@ class Cache(OrderedDict):
         if self.maxsize and len(self) > self.maxsize:
             oldest = next(iter(self))
             del self[oldest]
+
+    def __eq__(self, other):
+        if isinstance(other, Cache):
+            return dict.__eq__(self, other) and all(map(_eq, self, other))
+        return dict.__eq__(self, other)
 
     def __repr__(self):
         return '{}(maxsize={})'.format(
