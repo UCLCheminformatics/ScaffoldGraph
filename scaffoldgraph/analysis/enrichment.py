@@ -11,13 +11,14 @@ from scipy.stats import ks_2samp, binom_test
 from loguru import logger
 
 
-def _btp(scaffoldgraph, activity_key, alternative):
+def _btp(scaffoldgraph, activity_key, alternative, pd):
     result, active, total = {}, 0, 0
-    for m, a in scaffoldgraph.get_molecule_nodes(activity_key):
-        if a == 1:
-            active += 1
-        total += 1
-    pd = active / total
+    if pd is None:
+        for m, a in scaffoldgraph.get_molecule_nodes(activity_key):
+            if a == 1:
+                active += 1
+            total += 1
+        pd = active / total
     logger.debug(f'(BTP) Total: {total}, Active: {active}, pd: {pd}')
     for scaffold in scaffoldgraph.get_scaffold_nodes():
         mols, acts = zip(*scaffoldgraph.get_molecules_for_scaffold(scaffold, activity_key))
@@ -47,7 +48,7 @@ def bonferroni_correction(scaffoldgraph, crit):
     return {k: crit / v for k, v in hier.items()}
 
 
-def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='greater'):
+def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='greater', p=None):
     """
     Calculate scaffold enrichment using the Kolmogorov-Smirnov or binomal test.
 
@@ -66,13 +67,16 @@ def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='gr
           * 'two-sided'
           * 'less': one-sided
           * 'greater': one-sided
+    p : (float, optional (default=None))
+        The hypothesized probability of success. 0 <= p <= 1. Used in binomial mode. If not
+        specified p is set automatically (mumber of active / total compounds)
 
     Returns
     -------
     A dict of dicts in the format {scaffold: {pval}} where pval is the calculated p-value
     """
     if mode == 'binomial' or mode == 'b':
-        return _btp(scaffoldgraph, activity, alternative)
+        return _btp(scaffoldgraph, activity, alternative, p)
     elif mode == 'ks' or mode == 'k':
         return _ksp(scaffoldgraph, activity, alternative)
     else:
