@@ -39,6 +39,7 @@ class ScaffoldRuleSet(object):
 
     @property
     def rules(self):
+        """Return rules as a list"""
         return self._rules
 
     def filter_scaffolds(self, child, parents):
@@ -48,6 +49,8 @@ class ScaffoldRuleSet(object):
 
         Parameters
         ----------
+        child (Scaffold) : child scaffold
+        parents (list) : list of parent scaffolds
         """
 
         if len(self) == 0:
@@ -76,6 +79,7 @@ class ScaffoldRuleSet(object):
 
         Parameters
         ----------
+        rule : scaffold filter rule with base class BaseScaffoldFilterRule
         """
 
         if self.check_valid_rule(rule):
@@ -88,6 +92,8 @@ class ScaffoldRuleSet(object):
 
         Parameters
         ----------
+        rule : scaffold filter rule with base class BaseScaffoldFilterRule
+        index (int) : position in list to insert rule
         """
         if self.check_valid_rule(rule):
             self._rules.insert(index, rule)
@@ -99,11 +105,19 @@ class ScaffoldRuleSet(object):
 
         Parameters
         ----------
+        index (int) : position in list to delete rule
         """
         self._rules.__delitem__(index)
 
     @classmethod
     def from_rule_file(cls, filename, name=None):
+        """Create a scaffold rule set from a rule set file
+
+        Parameters
+        ----------
+        filename (str) : file name of the rule set file
+        name (str, optional) : name to assign rule set
+        """
         from .rule_io import read_rule_file
         rules = read_rule_file(filename)
         return cls(rules, name)
