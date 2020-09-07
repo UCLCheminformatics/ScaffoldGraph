@@ -83,7 +83,7 @@ def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='gr
         raise ValueError(f'scaffold enrichment mode: {mode}, not implemented')
 
 
-def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='greater', crit=0.01):
+def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='greater', crit=0.01, p=None):
     """
     Perform compound set enrichment (CSE), calculating scaffolds enriched for bioactivity.
 
@@ -104,6 +104,9 @@ def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='gre
           * 'greater': one-sided
     crit : (float, optional (default=0.01))
         The critical significance level
+    p : (float, optional (default=None))
+        The hypothesized probability of success. 0 <= p <= 1. Used in binomial mode. If not
+        specified p is set automatically (mumber of active / total compounds)
 
     Returns
     -------
@@ -122,7 +125,7 @@ def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='gre
            Compound Set Enrichment: A Novel Approach to Analysis of Primary HTS Data.
            Journal of Chemical Information and Modeling, 50(12), 2067-2078.
     """
-    set_node_attributes(scaffoldgraph, calc_scaffold_enrichment(scaffoldgraph, activity, mode, alternative))
+    set_node_attributes(scaffoldgraph, calc_scaffold_enrichment(scaffoldgraph, activity, mode, alternative, p))
     bonferroni = bonferroni_correction(scaffoldgraph, crit)
     result = []
     for scaffold, data in scaffoldgraph.get_scaffold_nodes(True):
