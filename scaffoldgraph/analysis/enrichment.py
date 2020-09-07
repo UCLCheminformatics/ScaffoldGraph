@@ -13,11 +13,11 @@ from loguru import logger
 
 def _btp(scaffoldgraph, activity_key, alternative, pd):
     result, active, total = {}, 0, 0
+    for m, a in scaffoldgraph.get_molecule_nodes(activity_key):
+        if a == 1:
+            active += 1
+        total += 1
     if pd is None:
-        for m, a in scaffoldgraph.get_molecule_nodes(activity_key):
-            if a == 1:
-                active += 1
-            total += 1
         pd = active / total
     logger.debug(f'(BTP) Total: {total}, Active: {active}, pd: {pd}')
     for scaffold in scaffoldgraph.get_scaffold_nodes():
