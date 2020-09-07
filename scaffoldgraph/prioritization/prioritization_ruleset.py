@@ -7,8 +7,6 @@ Implements a ruleset for scaffold prioritization when constructing scaffold tree
 from .prioritization_rules import BaseScaffoldFilterRule
 
 
-# TODO: add class method from file and add some basic rules in another directory \
-# rules are then defined by a series of strings from which they can be identified
 class ScaffoldRuleSet(object):
     """
     Class defining a set of rules used for scaffold prioritization
@@ -103,6 +101,12 @@ class ScaffoldRuleSet(object):
         ----------
         """
         self._rules.__delitem__(index)
+
+    @classmethod
+    def from_rule_file(cls, filename, name=None):
+        from .rule_io import read_rule_file
+        rules = read_rule_file(filename)
+        return cls(rules, name)
 
     @staticmethod
     def check_valid_rule(rule):

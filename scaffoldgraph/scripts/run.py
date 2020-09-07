@@ -100,6 +100,8 @@ def scaffoldgraph_args():
     # tree (generate a scaffold tree form a SMILES or SDF file)
     tree_parser = subparsers.add_parser('tree', description='Generate a scaffold tree',
                                         parents=[generate_parent_parser(), parent_parser()])
+    tree_parser.add_argument('-r', '--ruleset', help='supply a ruleset file for custom scaffold prioritization',
+                             metavar='')
     tree_parser.set_defaults(func=generate_cli)
 
     # select (select a subgraph of a scaffold graph using a molecular query)

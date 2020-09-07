@@ -23,7 +23,7 @@ class ScaffoldTree(ScaffoldGraph):
            Journal of Chemical Information and Modeling, 47(1), 47–58. PMID: 17238248.
     """
 
-    def __init__(self, graph=None, prioritization_rules=None):
+    def __init__(self, graph=None, prioritization_rules=None, **kwargs):
         super(ScaffoldTree, self).__init__(graph, MurckoRingFragmenter(True), 'tree')
         self.rules = prioritization_rules if prioritization_rules else original_ruleset
 

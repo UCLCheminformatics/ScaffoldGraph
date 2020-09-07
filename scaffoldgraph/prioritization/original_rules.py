@@ -9,10 +9,30 @@ from itertools import chain
 
 from rdkit.Chem import MolFromSmarts
 
+from scaffoldgraph.prioritization.prioritization_ruleset import ScaffoldRuleSet
 from scaffoldgraph.core.fragment import collect_linker_atoms
 
 from .prioritization_rules import *
-from .prioritization_ruleset import ScaffoldRuleSet
+
+
+__all__ = [
+    'OriginalRule01',
+    'OriginalRule02',
+    'OriginalRule03',
+    'OriginalRule04',
+    'OriginalRule05',
+    'OriginalRule06',
+    'OriginalRule07',
+    'OriginalRule08',
+    'OriginalRule09a',
+    'OriginalRule09b',
+    'OriginalRule09c',
+    'OriginalRule10',
+    'OriginalRule11',
+    'OriginalRule12',
+    'OriginalRule13',
+    'original_ruleset',
+]
 
 
 class OriginalRule01(ScaffoldFilterRule):
@@ -219,22 +239,25 @@ class OriginalRule13(BaseScaffoldFilterRule):
         return 'original rule 13'
 
 
-all_rules = [
-    OriginalRule01(),
-    OriginalRule02(),
-    OriginalRule03(),
-    OriginalRule04(),
-    OriginalRule05(),
-    OriginalRule06(),
-    OriginalRule07(),
-    OriginalRule08(),
-    OriginalRule09a(),
-    OriginalRule09b(),
-    OriginalRule09c(),
-    OriginalRule10(),
-    OriginalRule11(),
-    OriginalRule12(),
-    OriginalRule13(),
-]
+def _make_original_rules():
+    all_rules = [
+        OriginalRule01(),
+        OriginalRule02(),
+        OriginalRule03(),
+        OriginalRule04(),
+        OriginalRule05(),
+        OriginalRule06(),
+        OriginalRule07(),
+        OriginalRule08(),
+        OriginalRule09a(),
+        OriginalRule09b(),
+        OriginalRule09c(),
+        OriginalRule10(),
+        OriginalRule11(),
+        OriginalRule12(),
+        OriginalRule13(),
+    ]
+    return all_rules
 
-original_ruleset = ScaffoldRuleSet(all_rules, name='Original Rules')
+
+original_ruleset = ScaffoldRuleSet(_make_original_rules(), name='Original Rules')

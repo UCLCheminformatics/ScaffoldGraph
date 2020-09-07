@@ -17,7 +17,7 @@ class ScaffoldNetwork(ScaffoldGraph):
            Journal of Chemical Information and Modeling, 51(7), 1528–1538.
     """
 
-    def __init__(self, graph=None):
+    def __init__(self, graph=None, **kwargs):
         super(ScaffoldNetwork, self).__init__(graph, MurckoRingFragmenter(), 'network')
 
     def _recursive_constructor(self, child):
@@ -48,7 +48,7 @@ class HierS(ScaffoldGraph):
            Using Topological Chemical Graphs. Journal of Medicinal Chemistry, 48(9), 3182-3193.
     """
 
-    def __init__(self, graph=None):
+    def __init__(self, graph=None, **kwargs):
         super(HierS, self).__init__(graph, MurckoRingSystemFragmenter(), 'hiers')
 
     def _recursive_constructor(self, child):

@@ -7,9 +7,11 @@ import time
 
 from loguru import logger
 
+from scaffoldgraph import ScaffoldNetwork, ScaffoldTree, HierS
+from scaffoldgraph.prioritization import ScaffoldRuleSet
+from scaffoldgraph.io import tsv
+
 from .misc import file_format
-from .. import ScaffoldNetwork, ScaffoldTree, HierS
-from ..io import tsv
 
 start_message = """
 Running ScaffoldGraph ({command}) Generation with options:
@@ -41,10 +43,19 @@ def _get_graph_cls(name):
         raise ValueError(msg)
 
 
+def _maybe_ruleset(args):
+    ruleset = None
+    if 'ruleset' in args and args.ruleset is not None:
+        filename = args.ruleset
+        ruleset = ScaffoldRuleSet.from_rule_file(filename)
+    return ruleset
+
+
 def generate_cli(args):
     """Run scaffoldgraph generation for CLI utility"""
     graph_cls = _get_graph_cls(args.command)
     graph_name = graph_cls.__name__
+    ruleset = _maybe_ruleset(args)
 
     if not args.silent:
         print(
@@ -65,13 +76,15 @@ def generate_cli(args):
             args.input,
             ring_cutoff=args.max_rings,
             progress=args.silent is False,
-            zipped=zipped
+            zipped=zipped,
+            prioritization_rules=ruleset,
         )
     elif fmt == 'SMI':
         sg = graph_cls.from_smiles_file(
             args.input,
             ring_cutoff=args.max_rings,
-            progress=args.silent is False
+            progress=args.silent is False,
+            prioritization_rules=ruleset,
         )
     else:
         raise ValueError('input file format is not currently supported')

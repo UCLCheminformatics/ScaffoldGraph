@@ -4,7 +4,8 @@ scaffoldgraph tests.prioritization.test_prioritization_ruleset
 
 import pytest
 
-from scaffoldgraph.prioritization.original_rules import *
+from scaffoldgraph.prioritization import ScaffoldRuleSet, BaseScaffoldFilterRule
+from scaffoldgraph.prioritization.original_rules import original_ruleset, OriginalRule10
 
 
 @pytest.fixture(name='null_set')
