@@ -218,10 +218,11 @@ class MurckoRingSystemFragmenter(Fragmenter):
         return parents
 
 
-def collect_linker_atoms(origin, remove_atoms):
+def collect_linker_atoms(origin, remove_atoms, include_origin=True):
     """Used during fragmentation to collect atoms that are part of a linker"""
 
     visited = set()  # Visited bond indexes
+    ring_attachments = set()  # Linker ring attachments
 
     def collect(origin_atom):
 
@@ -263,10 +264,19 @@ def collect_linker_atoms(origin, remove_atoms):
                         remove_atoms.add(origin_atom.GetIdx())
                         correct_atom_props(other_atom)
                         visited.add(bond_id)
+                    if other_atom.IsInRing():
+                        ring_attachments.add(other_atom.GetIdx())
 
     # Linker is recursively collected
     # Linker atoms are added to the existing set 'remove_atoms'
     collect(origin)
+
+    if include_origin is False:
+        remove_atoms.discard(origin.GetIdx())
+    if origin.IsInRing():
+        ring_attachments.add(origin.GetIdx())
+
+    return ring_attachments
 
 
 def get_scaffold_frags(frag):

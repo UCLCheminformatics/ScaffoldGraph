@@ -9,6 +9,8 @@ from itertools import chain
 
 from rdkit.Chem import MolFromSmarts
 
+from scaffoldgraph.core.fragment import collect_linker_atoms
+
 from .prioritization_rules import *
 from .prioritization_ruleset import ScaffoldRuleSet
 
@@ -192,14 +194,14 @@ class OriginalRule11(ScaffoldFilterRule):
 class OriginalRule12(ScaffoldFilterRule):
     """Remove rings first where the linker is attached to a ring hetero atom at either end of the linker"""
 
-    connection_patt = MolFromSmarts('[R]!@!=*')
-
     def condition(self, child, parent):
+        linker, ra = set(), set()  # linker atoms, ring attachments
         removed_ring = child.rings[parent.removed_ring_idx]
-        connections = {x[0] for x in child.mol.GetSubstructMatches(self.connection_patt)}
-        ring_connections = connections.intersection(removed_ring.aix)
-        connection_atomic_nums = [child.atoms[x].GetAtomicNum() for x in ring_connections]
-        return len([a for a in connection_atomic_nums if a != 1 and a != 6]) > 0
+        attachments = removed_ring.get_attachment_points()
+        for attachment in attachments:
+            ra.update(collect_linker_atoms(child.mol.GetAtomWithIdx(attachment), linker, False))
+        atomic_nums = [child.atoms[x].GetAtomicNum() for x in ra]
+        return len([a for a in atomic_nums if a != 1 and a != 6]) > 0
 
     @property
     def name(self):

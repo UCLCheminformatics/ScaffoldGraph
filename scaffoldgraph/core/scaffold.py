@@ -227,6 +227,28 @@ class Ring(object):
         """Returns the size of the ring (number of atoms)"""
         return len(self)
 
+    @property
+    def aromatic(self):
+        """Return True/False if ring is/isn't aromatic"""
+        return all([x.GetIsAromatic() for x in self.bonds])
+
+    def get_attachment_points(self):
+        """Return atom indexes for linker attachments"""
+        attachments = set()
+        ri = self.owner.rings.info
+        for atom in self.atoms:
+            index = atom.GetIdx()
+            if ri.NumAtomRings(index) == 1:
+                if atom.GetDegree() > 2:
+                    attachments.add(index)
+        return attachments
+
+    def get_ring_system(self):
+        """Return the ring system associated with this ring"""
+        for system in self.owner.ring_systems:
+            if system.contains(self):
+                return system
+
     def __len__(self):
         """Returns the size of the ring (number of atoms)"""
         return len(self.aix)
@@ -331,9 +353,34 @@ class RingSystem(object):
         """Returns the size of the ring system (number of atoms)"""
         return len(self)
 
+    @property
+    def num_rings(self):
+        """Return the number of rings in the ring system"""
+        return len(self.rix)
+
     def get_rings(self):
         """Return Ring objects which are subsets of the fused system"""
         return iter(self)
+
+    def contains(self, ring):
+        """Return True if ring system contains query ring"""
+        assert type(ring) == Ring, f'query must be a {Ring} object'
+        return len(set(self.aix).intersection(ring.aix)) > 0
+
+    def contains_ring_idx(self, ring_idx):
+        """Return True if ring system contains query ring index"""
+        return ring_idx in self.rix
+
+    def get_attachment_points(self):
+        """Return atom indexes for linker attachments"""
+        attachments = set()
+        ri = self.owner.rings.info
+        for atom in self.atoms:
+            index = atom.GetIdx()
+            if ri.NumAtomRings(index) == 1:
+                if atom.GetDegree() > 2:
+                    attachments.add(index)
+        return attachments
 
     def __getitem__(self, index):
         return self.owner.rings[self.rix[index]]
