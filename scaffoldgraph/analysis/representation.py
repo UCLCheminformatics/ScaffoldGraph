@@ -25,7 +25,6 @@ class Cache(OrderedDict):
    https://docs.python.org/3/library/collections.html#collections.OrderedDict
 
     """
-
     def __init__(self, maxsize=None, *args, **kwargs):
         """
         Parameters
