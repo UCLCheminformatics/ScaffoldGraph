@@ -1,5 +1,7 @@
 """
 scaffoldgraph.analysis
+
+The analysis package contains functions for analyzing ScaffoldGraphs
 """
 
 from .representation import calc_average_pairwise_similarity, get_over_represented_scaffold_classes
