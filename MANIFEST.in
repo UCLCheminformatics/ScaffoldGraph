@@ -1,0 +1,6 @@
+include *.md
+include LICENSE
+include setup.py
+include requirements.txt
+include tests/test_smiles.smi
+recursive-include tests/*.py
