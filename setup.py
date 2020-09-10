@@ -1,20 +1,26 @@
 """
-scaffoldgraph setup
+scaffoldgraph setup.py
 """
 
 from setuptools import setup, find_packages
+from pathlib import Path
 
 __version__ = '1.0.2'
+
 url = 'https://github.com/UCLCheminformatics/scaffoldgraph'
 
 description = 'ScaffoldGraph is an open-source cheminformatics library, built using RDKit and \
 NetworkX for generating scaffold networks and scaffold trees.'
 
-with open('requirements.txt') as f:
+root = Path(__file__).parent.resolve()
+
+requires_path = root / 'requirements.txt'
+with requires_path.open('r', encoding='utf8') as f:
     install_requires = [line.strip() for line in f]
     install_requires.remove('rdkit')
 
-with open('README.md', encoding='utf-8') as f:
+readme_path = root / 'README.md'
+with readme_path.open('r', encoding='utf-8') as f:
     long_description = f.read()
 
 setup_requires = ['pytest-runner']
