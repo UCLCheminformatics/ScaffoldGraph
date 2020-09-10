@@ -16,7 +16,15 @@ from rdkit import Chem
 
 
 class Cache(OrderedDict):
-    """A basic implementation of an LRU cache using OrderedDict."""
+    """A basic implementation of an LRU cache using OrderedDict.
+
+    Adapted (slightly) from the collections ``OrderedDict``
+    documentation.
+
+    .. _collections OrderedDict Documentation:
+   https://docs.python.org/3/library/collections.html#collections.OrderedDict
+
+    """
 
     def __init__(self, maxsize=None, *args, **kwargs):
         """
