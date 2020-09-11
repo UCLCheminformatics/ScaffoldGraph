@@ -192,6 +192,12 @@ class MolecularSimilarityCache(object):
         self.clear_fp_cache()
         self.clear_sim_cache()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.clear()
+
     def __repr__(self):
         return '{}({}, {})'.format(
             self.__class__.__name__,
@@ -246,30 +252,30 @@ def calc_average_pairwise_similarity(scaffoldgraph, fp_func=None, sim_func=None,
 
     """
     aps_dict = {}
-    cache = MolecularSimilarityCache(fp_func, sim_func, fp_cache_maxsize, sim_cache_maxsize)
+    cache_args = (fp_func, sim_func, fp_cache_maxsize, sim_cache_maxsize)
 
-    for scaffold, data in scaffoldgraph.get_scaffold_nodes(True):
-        aps_data = aps_dict.setdefault(scaffold, {})
+    with MolecularSimilarityCache(*cache_args) as cache:
+        for scaffold, data in scaffoldgraph.get_scaffold_nodes(True):
+            aps_data = aps_dict.setdefault(scaffold, {})
 
-        if skip_levels and data['hierarchy'] in skip_levels:
-            aps_data['members'] = 0
-            aps_data['aps'] = 0.0
+            if skip_levels and data['hierarchy'] in skip_levels:
+                aps_data['members'] = 0
+                aps_data['aps'] = 0.0
 
-        m_nodes = scaffoldgraph.get_molecules_for_scaffold(scaffold, data=True)
-        n_members = len(m_nodes)
-        aps_data['members'] = n_members
+            m_nodes = scaffoldgraph.get_molecules_for_scaffold(scaffold, data=True)
+            n_members = len(m_nodes)
+            aps_data['members'] = n_members
 
-        # If only 1 member (or less in case of disconnect) set aps to 0.0
-        if n_members <= 1:
-            aps_data['aps'] = 0.0
-            continue
+            # If only 1 member (or less in case of disconnect) set aps to 0.0
+            if n_members <= 1:
+                aps_data['aps'] = 0.0
+                continue
 
-        pw_sims = []
-        for i, j in combinations(m_nodes, 2):
-            pw_sims.append(cache.get_similarity(i, j))
-        aps_data['aps'] = sum(pw_sims) / len(pw_sims)
+            pw_sims = []
+            for i, j in combinations(m_nodes, 2):
+                pw_sims.append(cache.get_similarity(i, j))
+            aps_data['aps'] = sum(pw_sims) / len(pw_sims)
 
-    cache.clear()  # empty the cache
     return aps_dict
 
 
