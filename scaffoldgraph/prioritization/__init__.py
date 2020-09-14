@@ -1,5 +1,7 @@
 """
 scaffoldgraph.prioritization
+
+Contains functions for scaffold prioritization.
 """
 
 from .original_rules import original_ruleset

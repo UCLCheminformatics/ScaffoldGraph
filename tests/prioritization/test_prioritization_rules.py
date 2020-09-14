@@ -18,7 +18,6 @@ class MockScaffoldFilterRule(BaseScaffoldFilterRule):
 
 def test_prioritization_rules():
     """Test abstract ruletypes cannot be initialized."""
-
     with pytest.raises(TypeError):
         BaseScaffoldFilterRule()
     with pytest.raises(TypeError):
@@ -31,7 +30,6 @@ def test_prioritization_rules():
 
 def test_base_rule_subclass():
     """Test base class can be subclassed"""
-
     mock = MockScaffoldFilterRule()
     parents = [0, 1, 2, 3, 4]
     assert mock.name == 'mock'

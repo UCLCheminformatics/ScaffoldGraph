@@ -36,7 +36,7 @@ __all__ = [
 
 
 class OriginalRule01(ScaffoldFilterRule):
-    """Remove heterocycles of size 3 first"""
+    """Remove heterocycles of size 3 first."""
 
     def condition(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -50,7 +50,7 @@ class OriginalRule01(ScaffoldFilterRule):
 
 
 class OriginalRule02(ScaffoldFilterRule):
-    """Do not remove rings with >= 12 atoms if there are smaller rings to remove"""
+    """Do not remove rings with >= 12 atoms if there are smaller rings to remove."""
 
     def condition(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -62,7 +62,7 @@ class OriginalRule02(ScaffoldFilterRule):
 
 
 class OriginalRule03(ScaffoldMinFilterRule):
-    """Choose the parent scaffold with the smallest number of acyclic linker bonds"""
+    """Choose the parent scaffold with the smallest number of acyclic linker bonds."""
 
     acyc_linker_smarts = MolFromSmarts('*!@!=!#*')
 
@@ -76,7 +76,7 @@ class OriginalRule03(ScaffoldMinFilterRule):
 
 
 class OriginalRule04(ScaffoldMaxFilterRule):
-    """Retain bridged rings, spiro rings and nonlinear fusion patterns with preference"""
+    """Retain bridged rings, spiro rings and nonlinear fusion patterns with preference."""
 
     def get_property(self, child, parent):
         nr = parent.rings.count
@@ -91,7 +91,7 @@ class OriginalRule04(ScaffoldMaxFilterRule):
 
 class OriginalRule05(ScaffoldFilterRule):
     """Bridged ring systems retained with preference over spiro rings,
-    Rings with a positive signed delta are retained"""
+    Rings with a positive signed delta are retained."""
 
     def condition(self, child, parent):
         nr = parent.rings.count
@@ -106,7 +106,7 @@ class OriginalRule05(ScaffoldFilterRule):
 
 
 class OriginalRule06(ScaffoldFilterRule):
-    """Remove rings of size 3, 5 and 6 first"""
+    """Remove rings of size 3, 5 and 6 first."""
 
     def condition(self, child, parent):
         rr_size = child.rings[parent.removed_ring_idx].size
@@ -125,7 +125,7 @@ class OriginalRule07(BaseScaffoldFilterRule):
     This is tricky to implement and should probably be done during the fragmentation process,
     although for efficiency it might be better to ignore this rule, rdkit seems to catch many
     of these cases in the partial sanitization as we do not attempt to change atom types when
-    this event occurs. (SNG also skips this step)
+    this event occurs. (SNG also skips this step).
     """
 
     def filter(self, child, parents):
@@ -137,7 +137,7 @@ class OriginalRule07(BaseScaffoldFilterRule):
 
 
 class OriginalRule08(ScaffoldMinFilterRule):
-    """Remove rings with the least hetero atoms first"""
+    """Remove rings with the least hetero atoms first."""
 
     def get_property(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -150,7 +150,7 @@ class OriginalRule08(ScaffoldMinFilterRule):
 
 
 class OriginalRule09a(ScaffoldMinFilterRule):
-    """Remove scaffolds with least nitrogen atoms in deleted ring"""
+    """Remove scaffolds with least nitrogen atoms in deleted ring."""
 
     def get_property(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -163,7 +163,7 @@ class OriginalRule09a(ScaffoldMinFilterRule):
 
 
 class OriginalRule09b(ScaffoldMinFilterRule):
-    """Remove scaffolds with least oxygen atoms in deleted ring"""
+    """Remove scaffolds with least oxygen atoms in deleted ring."""
 
     def get_property(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -176,7 +176,7 @@ class OriginalRule09b(ScaffoldMinFilterRule):
 
 
 class OriginalRule09c(ScaffoldMinFilterRule):
-    """Remove scaffolds with least sulphur atoms in deleted ring"""
+    """Remove scaffolds with least sulphur atoms in deleted ring."""
 
     def get_property(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -189,7 +189,7 @@ class OriginalRule09c(ScaffoldMinFilterRule):
 
 
 class OriginalRule10(ScaffoldMinFilterRule):
-    """Smaller rings are removed first"""
+    """Smaller rings are removed first."""
 
     def get_property(self, child, parent):
         return child.rings[parent.removed_ring_idx].size
@@ -200,7 +200,7 @@ class OriginalRule10(ScaffoldMinFilterRule):
 
 
 class OriginalRule11(ScaffoldFilterRule):
-    """Retain non-aromatic rings with preference"""
+    """Retain non-aromatic rings with preference."""
 
     def condition(self, child, parent):
         removed_ring = child.rings[parent.removed_ring_idx]
@@ -212,7 +212,7 @@ class OriginalRule11(ScaffoldFilterRule):
 
 
 class OriginalRule12(ScaffoldFilterRule):
-    """Remove rings first where the linker is attached to a ring hetero atom at either end of the linker"""
+    """Remove rings first where the linker is attached to a ring hetero atom at either end of the linker."""
 
     def condition(self, child, parent):
         linker, ra = set(), set()  # linker atoms, ring attachments
@@ -229,7 +229,7 @@ class OriginalRule12(ScaffoldFilterRule):
 
 
 class OriginalRule13(BaseScaffoldFilterRule):
-    """Tie-breaker rule (alphabetical)"""
+    """Tie-breaker rule (alphabetical)."""
 
     def filter(self, child, parents):
         return [sorted(parents, key=lambda p: p.smiles)[0]]
@@ -240,6 +240,7 @@ class OriginalRule13(BaseScaffoldFilterRule):
 
 
 def _make_original_rules():
+    """list: Generate a list of the original rules."""
     all_rules = [
         OriginalRule01(),
         OriginalRule02(),
@@ -260,4 +261,5 @@ def _make_original_rules():
     return all_rules
 
 
+# This is the ruleset used by the original scaffold tree publication.
 original_ruleset = ScaffoldRuleSet(_make_original_rules(), name='Original Rules')

@@ -3,10 +3,16 @@ scaffoldgraph tests.test_network
 """
 
 import pytest
+import os
+
+from pathlib import Path
 
 import scaffoldgraph as sg
 
 from . import mock_sdf, mock_smiles_file
+
+
+TEST_DATA_DIR = Path(__file__).resolve().parent / 'data'
 
 
 @pytest.fixture(name='test_net')
@@ -17,7 +23,7 @@ def test_network(sdf_file):
 
 @pytest.fixture(name='network')
 def long_test_network():
-    network = sg.ScaffoldNetwork.from_smiles_file('tests/test_smiles.smi')
+    network = sg.ScaffoldNetwork.from_smiles_file(str(TEST_DATA_DIR / 'test_smiles.smi'))
     return network
 
 

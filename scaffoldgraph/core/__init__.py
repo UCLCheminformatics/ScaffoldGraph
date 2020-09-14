@@ -1,5 +1,7 @@
 """
 scaffoldgraph.core
+
+The core package contains core functionality for building ScaffoldGraphs.
 """
 
 from .fragment import (MurckoRingFragmenter,

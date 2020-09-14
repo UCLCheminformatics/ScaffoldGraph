@@ -1,5 +1,7 @@
 """
 scaffoldgraph.io.dataframe
+
+Contains functions for reading molecules from pandas dataframes.
 """
 
 from rdkit.Chem import MolFromSmiles
@@ -10,10 +12,20 @@ class DataFrameMolSupplier(object):
     """Class supplying rdkit Mols from a pandas DataFrame."""
 
     def __init__(self, df, smiles_column, name_column, data_cols=None):
-        """Initialize DataFrameMolSupplier
+        """Initialize DataFrameMolSupplier.
 
         Parameters
         ----------
+        df : pandas.DataFrame
+            Dataframe to read molecules from.
+        smiles_column : str
+            Key of column containing SMILES strings.
+        name_column : str
+            Key of column containing molecule name strings.
+        data_cols : list, optional
+            A list of column keys containg data to retain
+            in molecule graph nodes. The default is None.
+
         """
         self.data_cols = data_cols
         if data_cols is None:
@@ -60,9 +72,19 @@ def read_dataframe(df, smiles_column, name_column, data_columns=None):
 
     Parameters
     ----------
+    df : pandas.DataFrame
+        Dataframe to read molecules from.
+    smiles_column : str
+        Key of column containing SMILES strings.
+    name_column : str
+        Key of column containing molecule name strings.
+    data_columns : list, optional
+        A list of column keys containg data to retain
+        in molecule graph nodes. The default is None.
 
     Returns
     -------
     DataFrameMolSupplier
+
     """
     return DataFrameMolSupplier(df, smiles_column, name_column, data_columns)

@@ -1,5 +1,9 @@
 """
 scaffoldgraph.scripts.operations
+
+CLI utilities
+    - aggregate
+    - select
 """
 
 import datetime
@@ -17,7 +21,8 @@ rdlogger = RDLogger.logger()
 
 
 class ScaffoldRecord(object):
-    """Class holds a scaffold read from a TSV output file"""
+    """Class holds a scaffold read from a TSV output file."""
+
     __slots__ = (
         'id',
         'hierarchy',
@@ -28,6 +33,7 @@ class ScaffoldRecord(object):
     )
 
     def __init__(self):
+        """Initializes an empty ScaffoldRecord."""
         self.id = None
         self.hierarchy = 0
         self.smiles = None
@@ -36,17 +42,20 @@ class ScaffoldRecord(object):
         self.annotations = set()
 
     def add_subscaffold(self, record):
+        """Add a subscaffold to the record."""
         self.subscaffolds.append(record)
 
     def add_molecule(self, molecule):
+        """Add a molecule to the record."""
         self.molecules.add(molecule)
 
     def add_annotation(self, annotation):
+        """Add an annotation to the record."""
         self.annotations.add(annotation)
 
 
 class ScaffoldFileIterator(object):
-    """Read an output TSV file into ScaffoldRecords"""
+    """Read an output TSV file into ScaffoldRecords."""
 
     def __init__(self, fw, reverse=False):
         self._fw = fw
@@ -106,7 +115,7 @@ class ScaffoldFileIterator(object):
 
 
 class AggregateCLI(object):
-    """Aggregate output TSV files (CLI)"""
+    """Aggregate output TSV files (CLI)."""
 
     def __init__(self, args):
 
@@ -309,7 +318,7 @@ Output saved @ {output}
 
 
 def aggregate_cli(args):
-    """Command line function for aggregating intermediate outputs"""
+    """Command line function for aggregating intermediate outputs."""
 
     if not args.silent:
         print(start_message.format(command='Aggregate', input=args.input,
@@ -339,7 +348,7 @@ Output saved @ {output}
 
 
 def select_cli(args):
-    """Command line function for selecting a subset using a molecular query"""
+    """Command line function for selecting a subset using a molecular query."""
 
     if not args.silent:
         print(start_message.format(command='Select',

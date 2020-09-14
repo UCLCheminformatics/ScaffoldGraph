@@ -2,5 +2,7 @@ include *.md
 include LICENSE
 include setup.py
 include requirements.txt
-include tests/test_smiles.smi
+include scaffoldgraph/*.py
+include scaffoldgraph/*/*.py
+include tests/data/test_smiles.smi
 recursive-include tests/*.py

@@ -16,14 +16,36 @@ from rdkit import Chem
 
 
 class Cache(OrderedDict):
-    """A basic implementation of an LRU cache using OrderedDict"""
+    """A basic implementation of an LRU cache using OrderedDict.
 
+    Adapted (slightly) from the collections ``OrderedDict``
+    documentation.
+
+    .. _collections OrderedDict Documentation:
+   https://docs.python.org/3/library/collections.html#collections.OrderedDict
+
+    """
     def __init__(self, maxsize=None, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        maxsize : int, None, optional
+            Set the maximum size of the cache, if None the cache
+            has no size limitation. The default is None.
+        *args
+            Variable length argument list.
+            Passed to OrderedDict.
+        **kwargs
+            Arbitrary keyword arguments.
+            Passed to OrderedDict.
+
+        """
         self._maxsize = maxsize
         super(Cache, self).__init__(*args, **kwargs)
 
     @property
     def maxsize(self):
+        """int: The maximum size of the cache."""
         return self._maxsize
 
     def __getitem__(self, key):
@@ -50,10 +72,26 @@ class Cache(OrderedDict):
 
 
 class MolecularSimilarityCache(object):
+    """An LRU cache for speeding up repeated molecular similarity computations."""
 
     __slots__ = ('_fp_func', '_sim_func', '_fp_cache', '_sim_cache')
 
     def __init__(self, fp_func=None, sim_func=None, fp_cache_maxsize=None, sim_cache_maxsize=None):
+        """
+        Parameters
+        ----------
+        fp_func : callable, optional
+            A function calculating a molecular fingerprint from an rdkit Mol object.
+            If None the function is set to ``rdkit.Chem.RDKFingerprint``.
+        sim_func : callable, optional
+            A function calculating the similarity between two fingerprints as returned
+            by `fp_func`. If None the function is set to ``rdkit.Datastructs.TanimotoSimilarity``
+        fp_cache_maxsize : int, optional
+            Set the maximum number of fingerprints cached. If None the cache is unbounded.
+        sim_cache_maxsize : int, optional
+             Set the maximum number of similarity values cached. If None the cache is unbounded.
+
+        """
         self._fp_func = fp_func if fp_func else Chem.RDKFingerprint
         assert callable(self._fp_func), 'fp_func must be callable or None'
         self._sim_func = sim_func if sim_func else DataStructs.TanimotoSimilarity
@@ -63,6 +101,11 @@ class MolecularSimilarityCache(object):
 
     @property
     def fp_func(self):
+        """callable: The fingerprinting function
+
+        If the fingerprinting function is changed both the similarity and
+        fingerpint caches are cleared.
+        """
         return self._fp_func
 
     @fp_func.setter
@@ -72,6 +115,10 @@ class MolecularSimilarityCache(object):
 
     @property
     def sim_func(self):
+        """callable: The molecular similarity function
+
+        If the similarity function is changed the similarity cache is cleared.
+        """
         return self._sim_func
 
     @sim_func.setter
@@ -80,6 +127,20 @@ class MolecularSimilarityCache(object):
         self.clear_sim_cache()  # clear only similarity cache
 
     def get_fingerprint(self, mol_node):
+        """Retrieve a fingerprint from the cache if it exists else calculate.
+
+        Parameters
+        ----------
+        mol_node : tuple
+            A molecule node from a ScaffoldGraph where the first entry is the
+            molecule ID and the second is a dictionary of node attributes.
+
+        Returns
+        -------
+        object
+            A molecular fingerprint.
+
+        """
         mol_id = mol_node[0]
         if mol_id in self._fp_cache:
             return self._fp_cache[mol_id]
@@ -92,6 +153,23 @@ class MolecularSimilarityCache(object):
         return self._fp_func(rdmol)
 
     def get_similarity(self, mol_node_1, mol_node_2):
+        """Retrieve a similarity value from the cache if it exists else calculate.
+
+        Parameters
+        ----------
+        mol_node_1 : tuple
+            A molecule node from a ScaffoldGraph where the first entry is the
+            molecule ID and the second is a dictionary of node attributes.
+        mol_node_2 : tuple
+            A molecule node from a ScaffoldGraph where the first entry is the
+            molecule ID and the second is a dictionary of node attributes.
+
+        Returns
+        -------
+        float
+            A molecular similarity score.
+
+        """
         id1, id2 = mol_node_1[0], mol_node_2[0]
         key = tuple(sorted([id1, id2]))
         if key in self._sim_cache:
@@ -102,14 +180,23 @@ class MolecularSimilarityCache(object):
         return sim
 
     def clear_fp_cache(self):
+        """Empty the fingerprint cache."""
         self._fp_cache.clear()
 
     def clear_sim_cache(self):
+        """Empty the similarity cache."""
         self._sim_cache.clear()
 
     def clear(self):
+        """Empty both the fingerprint and similarity caches."""
         self.clear_fp_cache()
         self.clear_sim_cache()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.clear()
 
     def __repr__(self):
         return '{}({}, {})'.format(
@@ -132,58 +219,63 @@ def calc_average_pairwise_similarity(scaffoldgraph, fp_func=None, sim_func=None,
     Notes
     -----
     The metric used in the HierS implementation is called APT (Average Pairwise Tanimoto).
-    In this implementation it is knows as APS as the function enables the user to specify
-    similarity metrics other than Tanimoto using the sim_func argument.
+    In this implementation it is known as 'APS', as the function enables the user to specify
+    similarity metrics other than Tanimoto using the `sim_func` argument.
 
     Parameters
     ----------
-    scaffoldgraph : (ScaffoldGraph)
-    fp_func : (callable or None, optional (default=None)) A callable returning a
-        molecular fingerprint from an RDKit Mol object. If None the fingerprint
-        is an RDKFingerprint with default parameters.
-    sim_func : (callable or None, optional (default=None)) A callable returning a
-        similarity value (float) for a pair of fingerprint objects calculated by
-        fp_func. If None the default metric is Tanimoto.
-    skip_levels : (tuple, list, optional (default=None)) Skip any scaffolds in hierarchy
-        levels specified. The aps and membership is set to 0.
-    fp_cache_maxsize : (int or None, optional (default=None)) If a value is
-        specified the maximum number of fingerprints cached at any time is equal
-        to value. If set to None no limit is set.
-    sim_cache_maxsize : (int or None, optional (default=None)) If a value is
-        specified the maximum number of pairwise similarities cached at any time is
-        equal to value. If set to None no limit is set.
+    scaffoldgraph : ScaffoldGraph
+    fp_func : callable, None, optional
+        A callable returning a molecular fingerprint from an RDKit Mol object.
+        If None the fingerprint is an RDKFingerprint with default parameters.
+    sim_func : callable, None, optional
+        A callable returning a similarity value (float) for a pair of fingerprint objects
+        calculated by `fp_func`. If None the default metric is Tanimoto.
+    skip_levels : iterable, None, optional
+        Skip any scaffolds in hierarchy levels specified.
+        The aps and membership is set to 0.
+    fp_cache_maxsize : int, optional
+            Set the maximum number of fingerprints cached. If None the cache is unbounded.
+    sim_cache_maxsize : int, optional
+             Set the maximum number of similarity values cached. If None the cache is unbounded.
 
     Returns
     -------
-    A dict of dicts in the format {scaffold: {members, aps}} where members is the
-    number of molecules in the scaffold cluster and aps is the average pairwise
-    similarity of the molecules in the cluster.
+    dict
+        A dict of dicts in the format {scaffold: {members, aps}} where members is the
+        number of molecules in the scaffold cluster and aps is the average pairwise
+        similarity of the molecules in the cluster.
+
+    See Also
+    --------
+    scaffoldgraph.analysis.representation.get_over_represented_scaffold_classes
+
     """
     aps_dict = {}
-    cache = MolecularSimilarityCache(fp_func, sim_func, fp_cache_maxsize, sim_cache_maxsize)
+    cache_args = (fp_func, sim_func, fp_cache_maxsize, sim_cache_maxsize)
 
-    for scaffold, data in scaffoldgraph.get_scaffold_nodes(True):
-        aps_data = aps_dict.setdefault(scaffold, {})
+    with MolecularSimilarityCache(*cache_args) as cache:
+        for scaffold, data in scaffoldgraph.get_scaffold_nodes(True):
+            aps_data = aps_dict.setdefault(scaffold, {})
 
-        if skip_levels and data['hierarchy'] in skip_levels:
-            aps_data['members'] = 0
-            aps_data['aps'] = 0.0
+            if skip_levels and data['hierarchy'] in skip_levels:
+                aps_data['members'] = 0
+                aps_data['aps'] = 0.0
 
-        m_nodes = scaffoldgraph.get_molecules_for_scaffold(scaffold, data=True)
-        n_members = len(m_nodes)
-        aps_data['members'] = n_members
+            m_nodes = scaffoldgraph.get_molecules_for_scaffold(scaffold, data=True)
+            n_members = len(m_nodes)
+            aps_data['members'] = n_members
 
-        # If only 1 member (or less in case of disconnect) set aps to 0.0
-        if n_members <= 1:
-            aps_data['aps'] = 0.0
-            continue
+            # If only 1 member (or less in case of disconnect) set aps to 0.0
+            if n_members <= 1:
+                aps_data['aps'] = 0.0
+                continue
 
-        pw_sims = []
-        for i, j in combinations(m_nodes, 2):
-            pw_sims.append(cache.get_similarity(i, j))
-        aps_data['aps'] = sum(pw_sims) / len(pw_sims)
+            pw_sims = []
+            for i, j in combinations(m_nodes, 2):
+                pw_sims.append(cache.get_similarity(i, j))
+            aps_data['aps'] = sum(pw_sims) / len(pw_sims)
 
-    cache.clear()  # empty the cache
     return aps_dict
 
 
@@ -212,23 +304,25 @@ def get_over_represented_scaffold_classes(scaffoldgraph, threshold=0.80, member_
 
     Parameters
     ----------
-    scaffoldgraph : (ScaffoldGraph)
-    threshold : (float, optional (default=0.80))
+    scaffoldgraph : ScaffoldGraph
+    threshold : float, optional
         Similarity threshold used to define potential over-represented scaffolds.
-    member_cutoff : (int or None, optional (default=None))
+        The default is 0.80 (i.e. medium)
+    member_cutoff : int, None, optional
         If set, scaffolds for which (member_cutoff <= member molecules) are not considered
-        to be over-represented (not significant).
-    skip_aps : (bool, optional (default=False))
-        If True function assumes that the APS has already been calculated and 'members' and
+        to be over-represented (not significant). The default is None.
+    skip_aps : bool, optional
+        If True the function assumes that the APS has already been calculated and 'members' and
         'aps' are scaffold node attributes (i.e. use if running the same function more than
-         once with different thresholds).
+         once with different thresholds). The default is False.
     **kwargs :
-        Arguments for the calc_average_pairwise_similarity function (calculating the APS metric)
+        Arguments for the calc_average_pairwise_similarity function (calculating the APS metric).
 
     References
     ----------
     .. [1] Wilkens, S., Janes, J., and Su, A. (2005). HierS: Hierarchical Scaffold Clustering
            Using Topological Chemical Graphs. Journal of Medicinal Chemistry, 48(9), 3182-3193.
+
     """
     if skip_aps is False:
         aps = calc_average_pairwise_similarity(scaffoldgraph, **kwargs)
