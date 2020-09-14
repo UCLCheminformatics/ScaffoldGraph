@@ -1,5 +1,14 @@
 """
 scaffoldgraph.io
+
+Contains functions for reading molecules from various formats.
+    - SMILES
+    - SDF
+    - DataFrame
+
+Constains function for writing ScaffoldGraphs to various formats.
+    - SDF
+    - TSV
 """
 
 from .dataframe import read_dataframe

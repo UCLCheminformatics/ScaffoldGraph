@@ -1,23 +1,32 @@
 """
 scaffoldgraph.io.tsv
+
+Contains functions for writing to TSV files.
 """
 
 import csv
 
 
 def write_tsv(scaffold_graph, output_file, write_ids=False):
-    """Write a graph to a file in a TSV format.
+    """Write a ScaffoldGraph to a file in TSV format.
 
-    Used by the CLI utility.
+    Used by scaffoldgraphs CLI utility.
 
     Parameters
     ----------
-    scaffold_graph : sg.ScaffoldGraph
-        An scaffold graph to write to a file
+    scaffold_graph : scaffoldgraph.core.ScaffoldGraph
+        An scaffold graph to write to a file.
     output_file : str
-        Path to output file
-    """
+        Path to output file.
+    write_ids : bool, optional
+        If True, write the fields {'ID', 'HIERARCHY', 'SMILES',
+        'SUBSCAFFOLDS'} else write the fields {'HIERARCHY',
+        'SMILES', 'SUBSCAFFOLDS', 'MOLECULES', 'ANNOTATIONS'}.
+        The aggregate CLI function uses write_ids=True, while
+        the generation utilities use write_ids=False. The default
+        is False.
 
+    """
     N = scaffold_graph.num_scaffold_nodes
     sorted_scaffolds = sorted(scaffold_graph.get_scaffold_nodes(data=True), key=lambda x: x[1]['hierarchy'])
 
