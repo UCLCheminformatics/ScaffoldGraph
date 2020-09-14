@@ -1,5 +1,7 @@
 """
 scaffoldgraph.utils.aggregate
+
+Functions for aggregating ScaffoldGraphs.
 """
 
 import warnings
@@ -10,23 +12,25 @@ from networkx import Graph, compose
 def aggregate(list_of_graphs):
     """Aggregate a list of graphs into one graph object.
 
-    Graphs within the list must be a subclass of a networkx Graph object
+    Graphs within the list must be a subclass of a networkx Graph object.
 
     Parameters
     ----------
-    list_of_graphs (list): A list of scaffold graphs for aggregation.
+    list_of_graphs : list
+        A list of scaffold graphs (ScaffoldGraph) for aggregation.
 
     Returns
     -------
-    A graph type object with the same class as the first entry in
-    the parameter list_of_graphs
+    ScaffoldGraph
+        A graph type object with the same class as the first entry in
+        the parameter list_of_graphs.
 
     Raises
     ------
     ValueError:
-        raises if an empty list is provided, instead of a list of graphs
+        raises if an empty list is provided, instead of a list of graphs.
     ValueError:
-        raises if any entry in the list is not a subclass of nx.Graph
+        raises if any entry in the list is not a subclass of nx.Graph.
 
     Examples
     --------
@@ -53,8 +57,8 @@ def aggregate(list_of_graphs):
     Based on nx.compose_all:
     .. _Compose-all: https://networkx.github.io/documentation/stable/reference/algorithms/
     generated/networkx.algorithms.operators.all.compose_all.html
-    """
 
+    """
     if not list_of_graphs:
         raise ValueError('Cannot apply aggregate to an empty list')
     graphs = iter(list_of_graphs)
