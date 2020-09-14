@@ -72,6 +72,9 @@ def test_rings(scaffold):
     assert isinstance(ring.size, int)
     assert len(ring) == len(ring.atoms)
     assert repr(ring) == '<Ring at {}>'.format(hex(id(ring)))
+    assert len(ring.get_attachment_points()) == 1
+    assert ring.is_exocyclic_attachment(ring.atoms[0]) is False
+    assert ring.get_ring_system().size == 9
 
 
 def test_ring_systems(scaffold):
@@ -98,3 +101,5 @@ def test_ring_systems(scaffold):
     assert repr(ring) == '<RingSystem at {}>'.format(hex(id(ring)))
     assert isinstance(ring[0], Ring)
     assert len(list(ring.get_rings())) == 2
+    assert len(ring.get_attachment_points()) == 1
+    assert ring.is_exocyclic_attachment(ring.atoms[0]) is False
