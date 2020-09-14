@@ -360,7 +360,7 @@ def get_scaffold_frags(frag):
     -----
     The function also performs a `partial sanitization` of the input.
     If the molecule fails to sanitize the function will return an
-    empty set. This case can oocur when an aromatic ring system is
+    empty set. This case can occur when an aromatic ring system is
     dissected in a way in which the resultant system is no longer
     aromatic.
 
