@@ -50,3 +50,15 @@ def test_murcko_next(mol):
     frags_2 = {Chem.MolToSmiles(x) for x in frags_2}
     assert len(frags_2) == 2
     assert len(frags_1.intersection(frags_2)) == 1
+
+
+def test_collect_linker_atoms():
+    mol = Chem.MolFromSmiles('CCCCCCCCCc1ccccc1')
+    remove_atoms = set()
+    a = collect_linker_atoms(mol.GetAtomWithIdx(0), remove_atoms, True)
+    assert len(a) == 1
+    assert len(remove_atoms) == 9
+    remove_atoms.clear()
+    a = collect_linker_atoms(mol.GetAtomWithIdx(0), remove_atoms, False)
+    assert len(a) == 1
+    assert len(remove_atoms) == 8

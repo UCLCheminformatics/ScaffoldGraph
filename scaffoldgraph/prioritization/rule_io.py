@@ -87,6 +87,9 @@ def read_rule_file(filename):
                 rule_name.lower(), None)
             if rule_cls is None:
                 raise ValueError(f'Rule {rule_name} is not defined')
-            rule = rule_cls(*tokens[1:])
+            if len(tokens) > 2:
+                rule = rule_cls(tokens[1], *list(map(int, tokens[2:])))
+            else:
+                rule = rule_cls(*tokens[1:])
             rules.append(rule)
     return rules

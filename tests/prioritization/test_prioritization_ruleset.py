@@ -2,7 +2,9 @@
 scaffoldgraph tests.prioritization.test_prioritization_ruleset
 """
 
+import tempfile
 import pytest
+import os
 
 from scaffoldgraph.prioritization import ScaffoldRuleSet, BaseScaffoldFilterRule
 from scaffoldgraph.prioritization.original_rules import original_ruleset, OriginalRule10
@@ -44,6 +46,21 @@ def test_builtins():
     original_ruleset.delete_rule(1)
     assert len(original_ruleset) == 15
     assert repr(original_ruleset) == '<ScaffoldRuleSet at {}>'.format(hex(id(original_ruleset)))
+
+
+def test_from_rule_file():
+    with tempfile.NamedTemporaryFile('w', suffix='.txt', prefix=os.path.basename(__file__)) as tf:
+        tf.write('OriginalRule01\nOriginalRule02\nSCPNumHetAtoms_min\nRRPRingSizeX_max_6')
+        tf.seek(0)
+        ruleset = ScaffoldRuleSet.from_rule_file(tf.name)
+        assert len(ruleset) == 4
+        assert ruleset[0].name == 'original rule 01'
+        assert ruleset[1].name == 'original rule 02'
+        assert ruleset[2].name == 'SCPNumHetAtoms'
+        assert ruleset[3].name == 'RRPRingSizeX'
+        assert ruleset[2].func == min
+        assert ruleset[3].func == max
+        assert ruleset[3].size == 6
 
 
 def test_errors(null_set):
