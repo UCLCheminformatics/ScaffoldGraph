@@ -22,7 +22,6 @@ def test_enrichment(network):
     assert 'pval' in entry[1]
     assert 'dmax' in entry[1]
     assert '_total' in entry[1]
-    assert type(entry[1]['pval'].item()) == float
     assert type(entry[1]['dmax']) == float
     assert type(entry[1]['_total']) == int
     compound_set_enrichment(network, 'activity', mode='ks')
@@ -37,7 +36,6 @@ def test_enrichment(network):
     assert 'pval' in entry[1]
     assert '_active' in entry[1]
     assert '_total' in entry[1]
-    assert type(entry[1]['pval'].item()) == float
     assert type(entry[1]['_active']) == int
     assert type(entry[1]['_total']) == int
     compound_set_enrichment(network, 'activity', mode='b')
