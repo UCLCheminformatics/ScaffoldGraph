@@ -2,10 +2,6 @@
 scaffoldgraph tests.analysis.test_representation
 """
 
-import pytest
-
-import scaffoldgraph as sg
-
 from scaffoldgraph.analysis import calc_average_pairwise_similarity, get_over_represented_scaffold_classes
 from ..test_network import long_test_network
 
