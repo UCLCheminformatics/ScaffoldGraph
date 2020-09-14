@@ -1,7 +1,7 @@
 """
 scaffoldgraph.scripts.run
 
-Module defines the CLI utility for ScaffoldGraph
+Module defines the CLI utility for ScaffoldGraph.
 """
 
 import argparse
@@ -34,8 +34,16 @@ usage = 'scaffoldgraph <command> [<args>]'
 
 
 def configure_logger(verbosity):
-    """Configure the scaffoldgraph cli logger to use tqdm handler"""
+    """Configure the scaffoldgraph cli logger to use tqdm handler.
 
+    Parameters
+    ----------
+    verbosity : int
+        Select the output verbosity. 0 is the lowest verbosity
+        'CRITICAL' and 4 is the highest verbosity 'DEBUG'. If
+        < 0 or > 4 the maximum verbosity is selected.
+
+    """
     config = {'handlers': []}
     logger.enable('scaffoldgraph')
 
@@ -63,7 +71,7 @@ def configure_logger(verbosity):
 
 
 def parent_parser():
-    """Common arguments for all scaffoldgraph commands"""
+    """Common arguments for all scaffoldgraph commands."""
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('-v', '--verbosity', metavar='', type=int, default=3, choices=[0, 1, 2, 3, 4],
                         help='set logger verbosity [0, 1, 2, 3, 4] (default: 3)')
@@ -82,7 +90,7 @@ def generate_parent_parser():
 
 
 def scaffoldgraph_args():
-    """ Defines CLI utility for ScaffoldGraph."""
+    """Defines CLI utility for ScaffoldGraph."""
     parser = argparse.ArgumentParser('scaffoldgraph', description=desc)
     parser.add_argument('--version', action='version', version=__version__)
     subparsers = parser.add_subparsers(title='command', dest='command')

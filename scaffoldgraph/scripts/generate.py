@@ -31,7 +31,7 @@ Output saved @ {output}
 
 
 def _get_graph_cls(name):
-    """Get scaffoldgraph class from name string"""
+    """Get scaffoldgraph class from name string."""
     if name == 'network':
         return ScaffoldNetwork
     elif name == 'tree':
@@ -44,6 +44,7 @@ def _get_graph_cls(name):
 
 
 def _maybe_ruleset(args):
+    """Return a ScaffoldRuleset if specified in CLI arguments."""
     ruleset = None
     if 'ruleset' in args and args.ruleset is not None:
         filename = args.ruleset
@@ -52,7 +53,7 @@ def _maybe_ruleset(args):
 
 
 def generate_cli(args):
-    """Run scaffoldgraph generation for CLI utility"""
+    """Run scaffoldgraph generation for CLI utility."""
     graph_cls = _get_graph_cls(args.command)
     graph_name = graph_cls.__name__
     ruleset = _maybe_ruleset(args)

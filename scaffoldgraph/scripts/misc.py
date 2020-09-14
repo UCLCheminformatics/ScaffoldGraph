@@ -9,7 +9,7 @@ import tqdm
 
 
 class TqdmHandler(logging.Handler):
-    """Logging handler for use with tqdm (used in CLI)"""
+    """Logging handler for use with tqdm (used in CLI)."""
 
     def __init__(self, level=logging.NOTSET):
         super().__init__(level)
