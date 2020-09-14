@@ -16,14 +16,40 @@ class ScaffoldTree(ScaffoldGraph):
     """
     Class representing a scaffold tree.
 
+    Explore scaffold-space through the iterative removal of the least-characteristic
+    ring from a molecular scaffold. The output is a tree of molecular scaffolds.
+
     References
     ----------
     .. [1] Schuffenhauer, A., Ertl, P., Roggo, S., Wetzel, S., Koch, M. A., and Waldmann, H. (2007).
            The scaffold tree visualization of the scaffold universe by hierarchical scaffold classification.
            Journal of Chemical Information and Modeling, 47(1), 47–58. PMID: 17238248.
-    """
 
+    See Also
+    --------
+    ScaffoldGraph
+    ScaffoldNetwork
+    HierS
+
+    """
     def __init__(self, graph=None, prioritization_rules=None, **kwargs):
+        """Initialize a ScaffoldTree.
+
+        Parameters
+        ----------
+        graph : input graph, optional
+            Data to initialize graph. If None (default) an empty
+            graph is created. The data can be any format that is supported
+            by the ``to_networkx_graph()`` function, currently including
+            edge list, dict of dicts, dict of lists, NetworkX graph,
+            NumPy matrix or 2d ndarray, SciPy sparse matrix,
+            or PyGraphviz graph. This argument is passed to the networkx
+            DiGraph constructor.
+        prioritization_rules : ScaffoldRuleSet
+            Ruleset for prioritizing parent scaffolds during tree
+            construction.
+
+        """
         super(ScaffoldTree, self).__init__(graph, MurckoRingFragmenter(True), 'tree')
         self.rules = prioritization_rules if prioritization_rules else original_ruleset
 
@@ -45,24 +71,28 @@ class ScaffoldTree(ScaffoldGraph):
 
     @property
     def prioritization_rules(self):
-        """Return the prioritization ruleset used"""
+        """ScaffoldRuleSet : Return the prioritization ruleset used."""
         return self.rules
 
 
 def tree_frags_from_mol(mol, prioritization_rules=None):
-    """Generate a scaffold tree from a single molecule without using networkx
+    """Generate a scaffold tree from a single molecule without using networkx.
 
     Parameters
     ----------
-    mol: rdkit molecule for processing
-    prioritization_rules: rules for prioritizing parent scaffolds
-        (optional, default: None)
+    mol: rdkit.Chem.rdchem.Mol
+        rdkit molecule for processing.
+    prioritization_rules : ScaffoldRuleSet, optional
+        rules for prioritizing parent scaffolds. If
+        not supplied the original rules are used.
+        The default is None.
 
     Returns
     -------
-    parents: an ordered list of rdkit Mols representing a scaffold tree
-    """
+    parents
+        An ordered list of rdkit Mols representing a scaffold tree.
 
+    """
     rdlogger.setLevel(4)
     scaffold = Scaffold(get_murcko_scaffold(mol))
     rdmolops.RemoveStereochemistry(scaffold.mol)
