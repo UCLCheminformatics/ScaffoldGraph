@@ -19,6 +19,45 @@ class ScaffoldTree(ScaffoldGraph):
     Explore scaffold-space through the iterative removal of the least-characteristic
     ring from a molecular scaffold. The output is a tree of molecular scaffolds.
 
+    Examples
+    --------
+    Create a ScaffoldTree from a SMILES file.
+
+    >>> import scaffoldgraph as sg
+    >>> tree = sg.ScaffoldTree.from_smiles_file('my_file.smi', progress=True)
+    >>> network.num_scaffold_nodes
+    75
+
+    Create a ScaffoldTree from an SDF.
+
+    >>> tree = sg.ScaffoldTree.from_sdf('my_file.sdf', progress=True)
+
+    If the SDF is zipped:
+
+    >>> tree = sg.ScaffoldTree.from_sdf('my_file.sdf.gz', zipped=True)
+
+    Get scaffold nodes:
+
+    >>> list(tree.get_scaffold_nodes())
+    ['O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1',
+    'O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1',
+    ...]
+
+    Include node attributes:
+
+    >>> list(tree.get_scaffold_nodes(data=True))
+    [('O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 4}),
+    ('O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 3}),
+    ...]
+
+    Get molecule nodes (use data=True to get attributes):
+
+    >>> list(tree.get_molecule_nodes())
+    ['DB00006',
+     'DB00007',
+     'DB00014',
+     ...]
+
     References
     ----------
     .. [1] Schuffenhauer, A., Ertl, P., Roggo, S., Wetzel, S., Koch, M. A., and Waldmann, H. (2007).

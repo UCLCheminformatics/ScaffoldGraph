@@ -14,6 +14,46 @@ class ScaffoldNetwork(ScaffoldGraph):
     generating all possible sub-scaffolds for a set of input molecules.
     The output is a directed acyclic graph of molecular scaffolds.
 
+    Examples
+    --------
+    Create a ScaffoldNetwork from a SMILES file.
+
+    >>> import scaffoldgraph as sg
+    >>> network = sg.ScaffoldNetwork.from_smiles_file('my_file.smi', progress=True)
+    >>> network.num_scaffold_nodes
+    100
+
+    Create a ScaffoldNetwork from an SDF.
+
+    >>> network = sg.ScaffoldNetwork.from_sdf('my_file.sdf', progress=True)
+
+    If the SDF is zipped:
+
+    >>> network = sg.ScaffoldNetwork.from_sdf('my_file.sdf.gz', zipped=True)
+
+    Get scaffold nodes:
+
+    >>> list(network.get_scaffold_nodes())
+    ['O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1',
+    'O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1',
+    ...]
+
+    Include node attributes:
+
+    >>> list(network.get_scaffold_nodes(data=True))
+    [('O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 4}),
+    ('O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 3}),
+    ...]
+
+    Get molecule nodes (use data=True to get attributes):
+
+    >>> list(network.get_molecule_nodes())
+    ['DB00006',
+     'DB00007',
+     'DB00014',
+     ...]
+
+
     References
     ----------
     .. [1] Varin, T., Schuffenhauer, A., Ertl, P., and Renner, S. (2011). Mining for bioactive
@@ -68,6 +108,45 @@ class HierS(ScaffoldGraph):
     A HierS type network differs from a conventional scaffold network, through construction.
     When fragmenting molecules the HierS constructor does not attempt to break fused ring
     systems.
+
+    Examples
+    --------
+    Create a HierS network from a SMILES file.
+
+    >>> import scaffoldgraph as sg
+    >>> network = sg.HierS.from_smiles_file('my_file.smi', progress=True)
+    >>> network.num_scaffold_nodes
+    92
+
+    Create a HierS netwoek from an SDF.
+
+    >>> network = sg.HierS.from_sdf('my_file.sdf', progress=True)
+
+    If the SDF is zipped:
+
+    >>> network = sg.HierS.from_sdf('my_file.sdf.gz', zipped=True)
+
+    Get scaffold nodes:
+
+    >>> list(network.get_scaffold_nodes())
+    ['O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1',
+    'O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1',
+    ...]
+
+    Include node attributes:
+
+    >>> list(network.get_scaffold_nodes(data=True))
+    [('O=C(OCOC(=O)c1cccc2ncn(Cc3ccccc3)c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 4}),
+    ('O=C(OCOC(=O)c1cccc2nc[nH]c12)OC1CCCCC1', {'type': 'scaffold', 'hierarchy': 3}),
+    ...]
+
+    Get molecule nodes (use data=True to get attributes):
+
+    >>> list(network.get_molecule_nodes())
+    ['DB00006',
+     'DB00007',
+     'DB00014',
+     ...]
 
     References
     ----------
