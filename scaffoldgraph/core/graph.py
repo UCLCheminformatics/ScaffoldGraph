@@ -676,7 +676,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         file_name : str
             File path to a SMILES file input.
         delimiter : str, optional
-            Delimiter used in SMILES file. The default is ' '
+            Delimiter used in SMILES file. The default is ' '.
         smiles_column : int, optional
             Index of column containing SMILES strings. The default is 0.
         name_column : int, optional
@@ -703,7 +703,9 @@ class ScaffoldGraph(nx.DiGraph, ABC):
 
     @classmethod
     def from_supplier(cls, supplier, ring_cutoff=10, progress=False, annotate=True, **kwargs):
-        """Construct a scaffoldgraph from a custom Mol supplier
+        """Construct a ScaffoldGraph from a custom rdkit Mol supplier.
+
+        A simple supplier could be a list of rdkit molecules or a supplier provided by rdkit.
 
         Parameters
         ----------
@@ -736,7 +738,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
     def from_dataframe(cls, df, smiles_column='Smiles', name_column='Name', data_columns=None,
                        ring_cutoff=10, progress=False, annotate=True, **kwargs):
 
-        """Construct a scaffoldgraph from a pandas DataFrame.
+        """Construct a ScaffoldGraph from a pandas DataFrame.
 
         Parameters
         ----------
