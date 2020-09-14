@@ -1,5 +1,8 @@
 """
 scaffoldgraph.prioritization.rule_io
+
+Functions for reading prioritization rulesets from a file.
+Can be used to specify custom rulesets when using the CLI.
 """
 
 from scaffoldgraph.prioritization.original_rules import *
@@ -54,6 +57,25 @@ rule_name_to_class = {
 
 
 def read_rule_file(filename):
+    """Read rules from a file.
+
+    Parameters
+    ----------
+    filename : str
+        Name of rule file.
+
+    Returns
+    -------
+    list
+        list of rule objects.
+
+    Raises
+    ------
+    ValueError
+        Raised if any of the rules defined in the
+        rule file are not implemented.
+
+    """
     rules = []
     with open(filename, 'r') as f:
         for line in f.readlines():
