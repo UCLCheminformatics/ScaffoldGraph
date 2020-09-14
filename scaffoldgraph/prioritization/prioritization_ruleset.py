@@ -149,7 +149,7 @@ class ScaffoldRuleSet(object):
         seperated by an underscore. i.e. RRPNumHetAtoms_min.
         For Rules which contain further arguments, these can be
         appended to the name with underscores. i.e.
-        RRPRingSize_max_6. In this case the rule will prioritize
+        RRPRingSizeX_max_6. In this case the rule will prioritize
         scaffolds where the removed rings size is equal to 6.
 
         Parameters
