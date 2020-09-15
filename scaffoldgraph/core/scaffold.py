@@ -375,7 +375,7 @@ class Ring(object):
         -------
         bool
             Returns True if the supplied atom is attached to
-            an exocylic attachment.
+            an exocyclic attachment.
 
         Raises
         ------
