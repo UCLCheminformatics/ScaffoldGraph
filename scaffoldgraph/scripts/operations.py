@@ -258,9 +258,9 @@ class SelectCLI(object):
         logger.info('Reading molecular query...')
         file = None
         fmt = file_format(self.q_input)
-        if fmt == 'SMI':
+        if fmt[0] == 'SMI':
             supplier = smiles.read_smiles_file(self.q_input)
-        elif fmt == 'SDF':
+        elif fmt[0] == 'SDF':
             rdlogger.setLevel(4)
             file = open(self.q_input, 'rb')
             supplier = sdf.read_sdf(file)
