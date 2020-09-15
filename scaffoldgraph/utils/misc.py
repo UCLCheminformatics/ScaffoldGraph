@@ -19,6 +19,11 @@ def canonize_smiles(smiles, failsafe=True):
         the input SMILES is returned instead
         of raising an error.
 
+    Returns
+    -------
+    str
+        The canonical SMILES representation.
+
     """
     mol = Chem.MolFromSmiles(smiles)
     if mol is None and failsafe:
