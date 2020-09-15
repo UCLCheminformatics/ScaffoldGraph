@@ -26,6 +26,56 @@ class Scaffold(object):
         the scaffold. If the `hash_func` is None (not set) then the
         canonical SMILES is used as the representation.
 
+    Examples
+    --------
+    Initializing a Scaffold:
+
+    >>> from rdkit import Chem
+    >>> smiles = 'O=c1c(-c2ccccc2)cccn1Cc1c[nH]cn1'
+    >>> mol = Chem.MolFromSmiles(smiles)
+    >>> scaffold = Scaffold(mol)
+
+    The underlying Mol can still be accessed:
+
+    >>> scaffold.mol
+    <rdkit.Chem.rdchem.Mol object at 0x7f03e94845d0>
+
+    Accessing bonds & atoms is easy:
+
+    >>> scaffold.atoms
+    [<rdkit.Chem.rdchem.Atom at 0x7f03e9495940>,
+    <rdkit.Chem.rdchem.Atom at 0x7f03e9495b70>,
+    ...]
+    >>> scaffold.bonds
+    [<rdkit.Chem.rdchem.Bond at 0x7f03e9498170>,
+    <rdkit.Chem.rdchem.Bond at 0x7f03e94982b0>,
+    ...]
+
+    Rings can also be accessed:
+
+    >>> scaffold.rings
+    <RingStack at 0x7f03e947cc60>
+    >>> scaffold.rings.count
+    3
+    >>> ring = scaffold.rings[0]
+    <Ring at 0x7f03e946ea08>
+    >>> ring.size
+    5
+    >>> ring.aromatic
+    True
+    >>> atoms = ring.atoms
+    >>> bonds = ring.bonds
+
+    Scaffolds also holds information about ring systems and
+    their properties:
+
+    >>> scaffold.ring_systems
+    <RingSystemStack at 0x7f03e948c750>
+    >>> system = scaffold.ring_systems[0]
+    >>> size = system.size
+    >>> atoms = system.size
+    >>> bonds = system.bonds
+
     """
     __slots__ = (
         'mol',
