@@ -5,7 +5,7 @@ scaffoldgraph setup.py
 from setuptools import setup, find_packages
 from pathlib import Path
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 url = 'https://github.com/UCLCheminformatics/scaffoldgraph'
 
