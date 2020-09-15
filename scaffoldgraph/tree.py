@@ -131,6 +131,15 @@ def tree_frags_from_mol(mol, prioritization_rules=None):
     parents
         An ordered list of rdkit Mols representing a scaffold tree.
 
+    Examples
+    --------
+    Generating scaffold tree fragments:
+
+    >>> from rdkit import Chem
+    >>> smiles = 'Cc1[nH]cnc1Cn1cccc(-c2ccccc2O)c1=O'
+    >>> molecule = Chem.MolFromSmiles(smiles)
+    >>> frags = tree_frags_from_mol(molecule)
+
     """
     rdlogger.setLevel(4)
     scaffold = Scaffold(get_murcko_scaffold(mol))

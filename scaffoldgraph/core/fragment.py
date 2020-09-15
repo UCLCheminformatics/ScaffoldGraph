@@ -504,7 +504,7 @@ def get_next_murcko_fragments(murcko_scaffold, break_fused_rings=True):
     return parents
 
 
-# fragmenter is hierarchial so all fragments may not be returned (fix?).
+# fragmenter is hierarchical so all fragments may not be returned (fix?).
 def get_all_murcko_fragments(mol, break_fused_rings=True):
     """
     Get all possible murcko fragments from a molecule through
@@ -520,6 +520,15 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
     -------
     list
         A list of Murcko fragments for the input molecule.
+
+    Examples
+    --------
+    Generating Murcko fragments:
+
+    >>> from rdkit import Chem
+    >>> smiles = 'Cc1[nH]cnc1Cn1cccc(-c2ccccc2O)c1=O'
+    >>> molecule = Chem.MolFromSmiles(smiles)
+    >>> frags = get_all_murcko_fragments(molecule)
 
     """
     rdlogger.setLevel(4)
