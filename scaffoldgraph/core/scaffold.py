@@ -353,7 +353,10 @@ class Ring(object):
         ri = self.owner.rings.info
         for atom in self.atoms:
             index = atom.GetIdx()
-            if ri.NumAtomRings(index) == 1:
+            if (
+                    ri.NumAtomRings(index) == 1 or
+                    any([not b.IsInRing() for b in atom.GetBonds()])
+            ):
                 if atom.GetDegree() > 2:
                     if (
                         include_exocyclic is False
@@ -615,10 +618,9 @@ class RingSystem(object):
 
         """
         attachments = set()
-        ri = self.owner.rings.info
         for atom in self.atoms:
             index = atom.GetIdx()
-            if ri.NumAtomRings(index) == 1:
+            if any([not b.IsInRing() for b in atom.GetBonds()]):
                 if atom.GetDegree() > 2:
                     if (
                         include_exocyclic is False

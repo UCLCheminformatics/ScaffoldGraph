@@ -145,7 +145,7 @@ class MurckoRingFragmenter(Fragmenter):
             # Collect all removable atoms in the molecule
             remove_atoms = set()
             for index, atom in zip(ring.aix, ring.atoms):
-                if rings.info.NumAtomRings(index) == 1:
+                if rings.info.NumAtomRings(index) == 1 or any([not b.IsInRing() for b in atom.GetBonds()]):
                     if atom.GetDegree() > 2:  # Evoke linker collection
                         collect_linker_atoms(edit.GetAtomWithIdx(index), remove_atoms)
                     else:  # Add ring atom to removable set
@@ -236,7 +236,7 @@ class MurckoRingSystemFragmenter(Fragmenter):
             edit = RWMol(scaffold.mol)
             remove_atoms = set()
             for index, atom in zip(ring.aix, ring.atoms):
-                if info.NumAtomRings(index) == 1:
+                if info.NumAtomRings(index) == 1 or any([not b.IsInRing() for b in atom.GetBonds()]):
                     if atom.GetDegree() > 2:  # Evoke linker collection
                         collect_linker_atoms(edit.GetAtomWithIdx(index), remove_atoms)
                     else:
