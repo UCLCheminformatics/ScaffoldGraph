@@ -145,7 +145,7 @@ class MurckoRingFragmenter(Fragmenter):
             # Collect all removable atoms in the molecule
             remove_atoms = set()
             for index, atom in zip(ring.aix, ring.atoms):
-                if rings.info.NumAtomRings(index) == 1 or any([not b.IsInRing() for b in atom.GetBonds()]):
+                if rings.info.NumAtomRings(index) == 1:
                     if atom.GetDegree() > 2:  # Evoke linker collection
                         collect_linker_atoms(edit.GetAtomWithIdx(index), remove_atoms)
                     else:  # Add ring atom to removable set
@@ -368,7 +368,7 @@ def get_scaffold_frags(frag):
     try:
         # frag.ClearComputedProps()
         # frag.UpdatePropertyCache()
-        # Chem.GetSymmSSSR(frag)
+        # FastFindRings(frag)
         partial_sanitization(frag)
     except ValueError as e:
         # This error is caught as dissecting an aromatic ring system,
