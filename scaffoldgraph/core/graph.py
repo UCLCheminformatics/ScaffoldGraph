@@ -18,7 +18,9 @@ from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
+from scaffoldgraph import rdversion
 from scaffoldgraph.utils import canonize_smiles
+
 from .fragment import get_murcko_scaffold, get_annotated_murcko_scaffold
 from .scaffold import Scaffold
 
@@ -37,7 +39,11 @@ def init_molecule_name(mol):
 
     """
     if not mol.HasProp('_Name') or mol.GetProp('_Name') == '':
-        n = rdMolHash.GenerateMoleculeHashString(mol)
+        if rdversion < '2020.09.01':
+            n = rdMolHash.GenerateMoleculeHashString(mol)
+        else:  # New version deprecated GenrateMolHashString
+            hashf = rdMolHash.HashFunction.CanonicalSmiles
+            n = 'MolNode-' + rdMolHash.MolHash(hashf)
         mol.SetProp('_Name', n)
 
 
