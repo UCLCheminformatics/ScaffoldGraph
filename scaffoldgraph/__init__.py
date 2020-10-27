@@ -2,8 +2,6 @@
 scaffoldgraph
 """
 
-import rdkit
-
 from loguru import logger
 
 from . import prioritization
@@ -20,11 +18,9 @@ from .tree import ScaffoldTree, tree_frags_from_mol
 
 __version__ = '1.0.3'
 
-rdversion = rdkit.__version__
 
 __all__ = [
     '__version__',
-    'rdversion',
     'HierS',
     'ScaffoldNetwork',
     'ScaffoldTree',

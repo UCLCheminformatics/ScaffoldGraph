@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 
 import networkx as nx
+import rdkit
 import gzip
 
 from loguru import logger
@@ -18,13 +19,13 @@ from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
-from scaffoldgraph import rdversion
 from scaffoldgraph.utils import canonize_smiles
 
 from .fragment import get_murcko_scaffold, get_annotated_murcko_scaffold
 from .scaffold import Scaffold
 
 rdlogger = RDLogger.logger()
+rdversion = rdkit.__version__
 
 
 def init_molecule_name(mol):
@@ -43,7 +44,7 @@ def init_molecule_name(mol):
             n = rdMolHash.GenerateMoleculeHashString(mol)
         else:  # New version deprecated GenrateMolHashString
             hashf = rdMolHash.HashFunction.CanonicalSmiles
-            n = 'MolNode-' + rdMolHash.MolHash(hashf)
+            n = 'MolNode-' + rdMolHash.MolHash(mol, hashf)
         mol.SetProp('_Name', n)
 
 
