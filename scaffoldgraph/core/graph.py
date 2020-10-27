@@ -38,6 +38,14 @@ def init_molecule_name(mol):
     ----------
     mol : rdkit.Chem.rdchem.Mol
 
+    Notes
+    -----
+    Since rdkit 2020.09.01 the GetMolHashString has been
+    deprecated. If using an rdkit version >= 2020.09.01
+    the function sets the name to 'MolNode-' plus the
+    canonical smiles. This prevents collisions with
+    scaffolds which are hashed using their canonical smiles.
+
     """
     if not mol.HasProp('_Name') or mol.GetProp('_Name') == '':
         if rdversion < '2020.09.01':
