@@ -48,10 +48,14 @@ setup(
         'networkx',
         'cheminformatics',
         'scaffolds',
+        'scaffold tree',
+        'scaffold network'
     ],
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
     entry_points=entry_points,
-    packages=find_packages(),
+    packages=find_packages(
+        exclude=['tests.*', 'tests']
+    ),
 )
