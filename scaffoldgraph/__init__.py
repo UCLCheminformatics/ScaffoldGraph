@@ -16,7 +16,7 @@ from .core import (
 from .network import ScaffoldNetwork, HierS
 from .tree import ScaffoldTree, tree_frags_from_mol
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 
 
 __all__ = [
