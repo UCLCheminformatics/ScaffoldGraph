@@ -15,7 +15,7 @@ root = Path(__file__).parent.resolve()
 
 init_path = root / 'scaffoldgraph' / '__init__.py'
 with init_path.open('r', encoding='utf8') as f:
-    __version__ = re.findall("__version__ = '(.*)'", f.read())
+    __version__ = re.findall("__version__ = '(.*)'", f.read())[0]
 
 requires_path = root / 'requirements.txt'
 with requires_path.open('r', encoding='utf8') as f:
