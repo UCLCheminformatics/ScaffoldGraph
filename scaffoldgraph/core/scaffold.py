@@ -6,7 +6,7 @@ A module defining scaffold objects used in ScaffoldGraph
 
 import weakref
 
-from rdkit.Chem import MolToSmiles, BondType, GetSymmSSSR
+from rdkit.Chem import MolToSmiles, MolFromSmiles, BondType, GetSymmSSSR
 
 
 class Scaffold(object):
@@ -98,12 +98,12 @@ class Scaffold(object):
 
         Parameters
         ----------
-        rdmol: rdkit.Chem.rdchem.Mol
+        rdmol : rdkit.Chem.rdchem.Mol
             An rdkit molecule representing a molecular scaffold. The
             class does not check the validity of the scaffold, as this
             definition may differ as per application, thus these checks
             should be performed by the user/application.
-        hash_func: callable, optional
+        hash_func : callable, optional
             Function for hash calculation, by default the canonical
             smiles string is used. The default is None. Ideally the
             hash provided should be canonical so that scaffolds which
@@ -209,6 +209,31 @@ class Scaffold(object):
         if self.hash_func:
             return self.hash_func(self.mol)
         return self.smiles
+
+    @classmethod
+    def from_smiles(cls, smiles, hash_func=None):
+        """Construct a Scaffold object from a SMILES string.
+
+        Parameters
+        ----------
+        smiles : str
+            A SMILES string representing a scaffold.
+        hash_func : callable, optional
+            Function for hash calculation, by default the canonical
+            smiles string is used. The default is None. Ideally the
+            hash provided should be canonical so that scaffolds which
+            are identical according to a paticular definition are mapped
+            to an identical hash. A user may want to customize the hash
+            function to suit a specific equivalence definition.
+
+        Returns
+        -------
+        Scaffold
+            A Scaffold object constructed from the SMILES supplied.
+
+        """
+        mol = MolFromSmiles(smiles)
+        return cls(mol, hash_func)
 
     def __getnewargs__(self):
         return (self.mol, {})
