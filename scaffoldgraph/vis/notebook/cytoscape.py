@@ -114,8 +114,8 @@ class CytoscapeVisualizer(Visualizer):
 
     @style.setter
     def style(self, style):
-        assert isinstance(style, dict),\
-            'style must be a dict object'
+        assert isinstance(style, list),\
+            'style must be a list object'
         self._style = style
 
     def _cytoscape_validate(self):
