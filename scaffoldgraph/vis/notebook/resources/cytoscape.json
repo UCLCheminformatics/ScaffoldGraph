@@ -1,0 +1,47 @@
+[
+  {
+    "selector": "node",
+    "style": {
+      "text-valign": "top",
+      "color": "#2E56AD",
+      "font-family": "arial",
+      "font-size": "40px",
+      "shape": "rectangle",
+      "width": 350,
+      "height": 300,
+      "background-color": "#9dbaea",
+      "background-fit": "contain",
+      "background-image": "data(img)",
+      "text-outline-width": 2,
+      "text-outline-color": "white"
+    }
+  },
+  {
+    "selector": "node[type='molecule']",
+    "style": {
+      "content": "data(id)",
+      "background-color": "black"
+    }
+  },
+  {
+    "selector": "edge",
+    "style": {
+      "width": 6,
+      "line-color": "#9dbaea",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "#9dbaea",
+      "curve-style": "bezier"
+    }
+  },
+  {
+    "selector": "edge[rule]",
+    "style": {
+      "content": "data(rule)",
+      "color": "#2E56AD",
+      "font-family": "arial",
+      "font-size": "30px",
+      "text-outline-width": 2,
+      "text-outline-color": "white"
+    }
+  }
+]
