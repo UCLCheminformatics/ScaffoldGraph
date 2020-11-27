@@ -4,8 +4,7 @@ scaffoldgraph setup.py
 
 from setuptools import setup, find_packages
 from pathlib import Path
-
-__version__ = '1.0.4'
+import re
 
 url = 'https://github.com/UCLCheminformatics/scaffoldgraph'
 
@@ -13,6 +12,10 @@ description = 'ScaffoldGraph is an open-source cheminformatics library, built us
 NetworkX for generating scaffold networks and scaffold trees.'
 
 root = Path(__file__).parent.resolve()
+
+init_path = root / 'scaffoldgraph' / '__init__.py'
+with init_path.open('r', encoding='utf8') as f:
+    __version__ = re.findall("__version__ = '(.*)'", f.read())
 
 requires_path = root / 'requirements.txt'
 with requires_path.open('r', encoding='utf8') as f:
