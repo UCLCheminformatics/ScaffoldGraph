@@ -6,7 +6,7 @@ A module defining scaffold objects used in ScaffoldGraph
 
 import weakref
 
-from rdkit.Chem import MolToSmiles, BondType
+from rdkit.Chem import MolToSmiles, BondType, GetSymmSSSR
 
 
 class Scaffold(object):
@@ -277,21 +277,43 @@ class RingStack(object):
 
     def __init__(self, owner):
         self.owner = weakref.proxy(owner)
-        self.info = self.owner.mol.GetRingInfo()
+        self.info = self._initialize_ring_info()
         self.atom_rings = self.info.AtomRings()
         self.bond_rings = self.info.BondRings()
+
+    def _initialize_ring_info(self):
+        """RingInfo: Initialize ring information, catch if not available"""
+        try:
+            ri = self.owner.mol.GetRingInfo()
+            _ = ri.NumRings()
+            return ri
+        except RuntimeError:
+            GetSymmSSSR(self.owner.mol)
+            ri = self.owner.mol.GetRingInfo()
+            return ri
 
     @property
     def count(self):
         """int : Returns the number of rings in the stack."""
         return len(self)
 
+    def to_list(self):
+        """list: Return a list of Rings in the stack."""
+        return list(self)
+
     def __getitem__(self, index):
-        return Ring(
-            self.owner,
-            self.atom_rings[index],
-            self.bond_rings[index]
-        )
+        if isinstance(index, slice):
+            return self.to_list()[index]
+        elif isinstance(index, int):
+            return Ring(
+                self.owner,
+                self.atom_rings[index],
+                self.bond_rings[index]
+            )
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         """Returns the number of rings in the stack."""
@@ -504,13 +526,24 @@ class RingSystemStack(object):
         """int : Returns the number of ring systems in the stack."""
         return len(self)
 
+    def to_list(self):
+        """list: return a list of the ring systems in the stack."""
+        return list(self)
+
     def __getitem__(self, index):
-        return RingSystem(
-            self.owner,
-            self.atom_rings[index],
-            self.bond_rings[index],
-            self.ring_indexes[index]
-        )
+        if isinstance(index, slice):
+            return self.to_list()[index]
+        elif isinstance(index, int):
+            return RingSystem(
+                self.owner,
+                self.atom_rings[index],
+                self.bond_rings[index],
+                self.ring_indexes[index]
+            )
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         """Returns the number of ring systems in the stack."""
@@ -678,7 +711,15 @@ class RingSystem(object):
         return exocyclic
 
     def __getitem__(self, index):
-        return self.owner.rings[self.rix[index]]
+        if isinstance(index, slice):
+            rings = self.owner.rings
+            return [rings[ix] for ix in self.rix[index]]
+        elif isinstance(index, int):
+            return self.owner.rings[self.rix[index]]
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         return len(self.aix)
