@@ -210,6 +210,19 @@ class Scaffold(object):
             return self.hash_func(self.mol)
         return self.smiles
 
+    def __getnewargs__(self):
+        return (self.mol, {})
+
+    def __getstate__(self):
+        return self.mol, self.hash_func
+
+    def __setstate__(self, state):
+        self.mol, self.hash_func = state
+        setattr(self, '_atoms', None)
+        setattr(self, '_bonds', None)
+        setattr(self, '_rings', None)
+        setattr(self, '_ring_systems', None)
+
     def __bool__(self):
         """Returns True if the molecule contains at least 1 atom."""
         return len(self.atoms) >= 1

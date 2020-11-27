@@ -3,6 +3,8 @@ scaffoldgraph tests.core.test_scaffold
 """
 
 import pytest
+import pickle
+
 from rdkit import Chem
 
 from scaffoldgraph.core.scaffold import *
@@ -19,6 +21,16 @@ def basic_scaffold():
 def test_new():
     scaffold = Scaffold(None)
     assert scaffold is None
+
+
+def test_pickle(scaffold):
+    b = pickle.dumps(scaffold)
+    s = pickle.loads(b)
+    assert s.atoms
+    assert s.bonds
+    assert s.rings
+    assert s.ring_systems
+    assert s.smiles
 
 
 def test_smiles(scaffold):
