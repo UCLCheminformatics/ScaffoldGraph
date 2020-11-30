@@ -39,7 +39,7 @@ class Visualizer(ABC):
     @property
     def graph(self):
         """ScaffoldGraph: return the graph associated with the visualizer."""
-        return self.graph
+        return self._graph
 
     @graph.setter
     def graph(self, graph):
