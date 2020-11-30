@@ -114,7 +114,7 @@ def add_root_node(graph):
 
     """
     graph.add_node('root', type='root', hierarchy=0)
-    edges = [('root', scf) for scf, degree in graph.in_degree if degree == 0]
+    edges = [('root', s) for s, d in graph.in_degree if d == 0 and s != 'root']
     graph.add_edges_from(edges, type=2)
 
 
