@@ -73,7 +73,7 @@ def smiles_to_image(smiles, size=(350, 300), draw_options=None):
     return img_path
 
 
-def embed_node_mol_images(graph, size=(350, 300), draw_options=None):
+def embed_node_mol_images(graph, size=(350, 300), draw_options=None, skip_existing=True):
     """Embed molecule images into a graph.
 
     Images are added as an attribute 'img' to each node with an
@@ -88,10 +88,15 @@ def embed_node_mol_images(graph, size=(350, 300), draw_options=None):
         Size of image, the default is (350, 300).
     draw_options : rdMolDraw2D.MolDrawOptions
         Options to pass to the drawer.
+    skip_existing : bool
+        Skip node if it contains an 'img' attribute.
+        The default is True.
 
     """
     for node, data in graph.nodes(data=True):
-        if data.get('type', None) == 'scaffold':
+        if skip_existing and data.get('img', None):
+            continue
+        elif data.get('type', None) == 'scaffold':
             data['img'] = smiles_to_image(node, size, draw_options)
         elif data.get('type', None) == 'molecule':
             data['img'] = smiles_to_image(data['smiles'], size, draw_options)
