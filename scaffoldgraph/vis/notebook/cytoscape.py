@@ -118,7 +118,8 @@ class CytoscapeVisualizer(Visualizer):
             'style must be a list object'
         self._style = style
 
-    def _cytoscape_validate(self):
+    @staticmethod
+    def _cytoscape_validate():
         if _cytoscape_available is False:
             raise RuntimeError('ipycytoscape is not available')
 
