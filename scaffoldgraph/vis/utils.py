@@ -102,3 +102,30 @@ def embed_node_mol_images(graph, size=(350, 300), draw_options=None, skip_existi
             data['img'] = smiles_to_image(data['smiles'], size, draw_options)
         else:
             data['img'] = ''
+
+
+def add_root_node(graph):
+    """Add a root node to a scaffoldgraph.
+
+    Parameters
+    ----------
+    graph : ScaffoldGraph
+        Graph to add root node.
+
+    """
+    graph.add_node('root', type='root', hierarchy=0)
+    edges = [('root', scf) for scf, degree in graph.in_degree if degree == 0]
+    graph.add_edges_from(edges, type=2)
+
+
+def remove_root_node(graph):
+    """Remove a root node from a scaffoldgraph.
+
+    Parameters
+    ----------
+    graph : Scaffoldgraph
+        Graph from which to remove root node.
+
+    """
+    if 'root' in graph:
+        graph.remove_node('root')
