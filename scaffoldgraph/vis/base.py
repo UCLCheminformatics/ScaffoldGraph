@@ -4,7 +4,7 @@ scaffoldgraph.vis.base
 
 import networkx as nx
 
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from scaffoldgraph.core import ScaffoldGraph
 from scaffoldgraph.utils import canonize_smiles
