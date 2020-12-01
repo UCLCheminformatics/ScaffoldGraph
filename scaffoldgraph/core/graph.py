@@ -541,6 +541,13 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         """
         return self._get_scaffold_hierarchy(scaffold_smiles, data, default, max_levels, 'child')
 
+    def add_scaffold_molecule_count(self):
+        """Add the number of molecules containing each scaffold node as a scaffold
+         node attribute ('count')."""
+        for scaffold, data in self.nodes(data=True):
+            mols = self.get_molecules_for_scaffold(scaffold)
+            data['count'] = len(mols)
+
     def separate_disconnected_components(self, sort=False):
         """Separate disconnected components into distinct ScaffoldGraph objects.
 

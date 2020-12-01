@@ -3,6 +3,8 @@ scaffoldgraph tests.core.test_scaffold
 """
 
 import pytest
+import pickle
+
 from rdkit import Chem
 
 from scaffoldgraph.core.scaffold import *
@@ -19,6 +21,16 @@ def basic_scaffold():
 def test_new():
     scaffold = Scaffold(None)
     assert scaffold is None
+
+
+def test_pickle(scaffold):
+    b = pickle.dumps(scaffold)
+    s = pickle.loads(b)
+    assert s.atoms
+    assert s.bonds
+    assert s.rings
+    assert s.ring_systems
+    assert s.smiles
 
 
 def test_smiles(scaffold):
@@ -75,6 +87,10 @@ def test_rings(scaffold):
     assert len(ring.get_attachment_points()) == 1
     assert ring.is_exocyclic_attachment(ring.atoms[0]) is False
     assert ring.get_ring_system().size == 9
+    assert len(rings.to_list()) == 3
+    subset = rings[0:2]
+    assert len(subset) == 2
+    assert subset[0] != subset[1]
 
 
 def test_ring_systems(scaffold):
@@ -103,3 +119,8 @@ def test_ring_systems(scaffold):
     assert len(list(ring.get_rings())) == 2
     assert len(ring.get_attachment_points()) == 1
     assert ring.is_exocyclic_attachment(ring.atoms[0]) is False
+    subset = rings[1:]
+    assert len(subset) == 1
+    assert isinstance(subset[0][0], Ring)
+    assert len(subset[0][0:2]) == 2
+

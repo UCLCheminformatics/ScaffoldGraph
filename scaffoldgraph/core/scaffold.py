@@ -6,7 +6,7 @@ A module defining scaffold objects used in ScaffoldGraph
 
 import weakref
 
-from rdkit.Chem import MolToSmiles, BondType
+from rdkit.Chem import MolToSmiles, MolFromSmiles, BondType, GetSymmSSSR
 
 
 class Scaffold(object):
@@ -98,12 +98,12 @@ class Scaffold(object):
 
         Parameters
         ----------
-        rdmol: rdkit.Chem.rdchem.Mol
+        rdmol : rdkit.Chem.rdchem.Mol
             An rdkit molecule representing a molecular scaffold. The
             class does not check the validity of the scaffold, as this
             definition may differ as per application, thus these checks
             should be performed by the user/application.
-        hash_func: callable, optional
+        hash_func : callable, optional
             Function for hash calculation, by default the canonical
             smiles string is used. The default is None. Ideally the
             hash provided should be canonical so that scaffolds which
@@ -210,6 +210,44 @@ class Scaffold(object):
             return self.hash_func(self.mol)
         return self.smiles
 
+    @classmethod
+    def from_smiles(cls, smiles, hash_func=None):
+        """Construct a Scaffold object from a SMILES string.
+
+        Parameters
+        ----------
+        smiles : str
+            A SMILES string representing a scaffold.
+        hash_func : callable, optional
+            Function for hash calculation, by default the canonical
+            smiles string is used. The default is None. Ideally the
+            hash provided should be canonical so that scaffolds which
+            are identical according to a paticular definition are mapped
+            to an identical hash. A user may want to customize the hash
+            function to suit a specific equivalence definition.
+
+        Returns
+        -------
+        Scaffold
+            A Scaffold object constructed from the SMILES supplied.
+
+        """
+        mol = MolFromSmiles(smiles)
+        return cls(mol, hash_func)
+
+    def __getnewargs__(self):
+        return (self.mol, {})
+
+    def __getstate__(self):
+        return self.mol, self.hash_func
+
+    def __setstate__(self, state):
+        self.mol, self.hash_func = state
+        setattr(self, '_atoms', None)
+        setattr(self, '_bonds', None)
+        setattr(self, '_rings', None)
+        setattr(self, '_ring_systems', None)
+
     def __bool__(self):
         """Returns True if the molecule contains at least 1 atom."""
         return len(self.atoms) >= 1
@@ -264,21 +302,43 @@ class RingStack(object):
 
     def __init__(self, owner):
         self.owner = weakref.proxy(owner)
-        self.info = self.owner.mol.GetRingInfo()
+        self.info = self._initialize_ring_info()
         self.atom_rings = self.info.AtomRings()
         self.bond_rings = self.info.BondRings()
+
+    def _initialize_ring_info(self):
+        """RingInfo: Initialize ring information, catch if not available"""
+        try:
+            ri = self.owner.mol.GetRingInfo()
+            _ = ri.NumRings()
+            return ri
+        except RuntimeError:
+            GetSymmSSSR(self.owner.mol)
+            ri = self.owner.mol.GetRingInfo()
+            return ri
 
     @property
     def count(self):
         """int : Returns the number of rings in the stack."""
         return len(self)
 
+    def to_list(self):
+        """list: Return a list of Rings in the stack."""
+        return list(self)
+
     def __getitem__(self, index):
-        return Ring(
-            self.owner,
-            self.atom_rings[index],
-            self.bond_rings[index]
-        )
+        if isinstance(index, slice):
+            return self.to_list()[index]
+        elif isinstance(index, int):
+            return Ring(
+                self.owner,
+                self.atom_rings[index],
+                self.bond_rings[index]
+            )
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         """Returns the number of rings in the stack."""
@@ -491,13 +551,24 @@ class RingSystemStack(object):
         """int : Returns the number of ring systems in the stack."""
         return len(self)
 
+    def to_list(self):
+        """list: return a list of the ring systems in the stack."""
+        return list(self)
+
     def __getitem__(self, index):
-        return RingSystem(
-            self.owner,
-            self.atom_rings[index],
-            self.bond_rings[index],
-            self.ring_indexes[index]
-        )
+        if isinstance(index, slice):
+            return self.to_list()[index]
+        elif isinstance(index, int):
+            return RingSystem(
+                self.owner,
+                self.atom_rings[index],
+                self.bond_rings[index],
+                self.ring_indexes[index]
+            )
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         """Returns the number of ring systems in the stack."""
@@ -665,7 +736,15 @@ class RingSystem(object):
         return exocyclic
 
     def __getitem__(self, index):
-        return self.owner.rings[self.rix[index]]
+        if isinstance(index, slice):
+            rings = self.owner.rings
+            return [rings[ix] for ix in self.rix[index]]
+        elif isinstance(index, int):
+            return self.owner.rings[self.rix[index]]
+        else:
+            raise TypeError(
+                'invalid argument, must be int or slice'
+            )
 
     def __len__(self):
         return len(self.aix)
