@@ -8,6 +8,7 @@ from loguru import logger
 
 from rdkit import RDLogger
 from rdkit.Chem import (
+    Mol,
     RWMol,
     MolToSmiles,
     rdmolops,
@@ -15,6 +16,7 @@ from rdkit.Chem import (
     GetMolFrags,
     BondType,
     GetSymmSSSR,
+    RemoveHs,
     CHI_UNSPECIFIED,
     SANITIZE_ALL,
     SANITIZE_CLEANUP,
@@ -453,6 +455,46 @@ def remove_exocyclic_attachments(mol):
     rdmolops.AssignRadicals(edit)
     GetSymmSSSR(edit)
     return edit.GetMol()
+
+
+def genericise_scaffold(mol):
+    """Make a scaffold generic.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Molecule to make generic.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        Genericised scaffold.
+
+    Notes
+    -----
+    Copy pasta'd from rdkit Murcko Scaffold module.
+    Adds a degree check to make sure output will
+    not fail sanitization when an atom has a degree
+    > 4. Achieved by using a dummy atom to replace
+    such atoms.
+
+    """
+    out = Mol(mol)
+    for atom in out.GetAtoms():
+        if atom.GetAtomicNum() != 1:
+            if atom.GetDegree() <= 4:
+                atom.SetAtomicNum(6)
+            else:
+                atom.SetAtomicNum(0)
+        atom.SetIsAromatic(False)
+        atom.SetFormalCharge(0)
+        atom.SetChiralTag(CHI_UNSPECIFIED)
+        atom.SetNoImplicit(0)
+        atom.SetNumExplicitHs(0)
+    for bond in out.GetBonds():
+        bond.SetBondType(BondType.SINGLE)
+        bond.SetIsAromatic(False)
+    return RemoveHs(out)
 
 
 def get_murcko_scaffold(mol, generic=False):
