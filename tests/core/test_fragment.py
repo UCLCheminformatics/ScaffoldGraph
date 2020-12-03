@@ -62,3 +62,8 @@ def test_collect_linker_atoms():
     a = collect_linker_atoms(mol.GetAtomWithIdx(0), remove_atoms, False)
     assert len(a) == 1
     assert len(remove_atoms) == 8
+
+
+def test_remove_exocylic_attachments(mol):
+    edited = remove_exocyclic_attachments(mol)
+    assert Chem.MolToSmiles(edited) == canon('CCN1CCc2c(sc(NCNc3ccc(Cl)cc3)c2C#N)C1')

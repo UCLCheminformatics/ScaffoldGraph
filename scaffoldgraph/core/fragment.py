@@ -14,6 +14,7 @@ from rdkit.Chem import (
     SanitizeMol,
     GetMolFrags,
     BondType,
+    GetSymmSSSR,
     CHI_UNSPECIFIED,
     SANITIZE_ALL,
     SANITIZE_CLEANUP,
@@ -417,6 +418,41 @@ def partial_sanitization(mol):
         SANITIZE_CLEANUPCHIRALITY ^
         SANITIZE_FINDRADICALS
     )
+
+
+def remove_exocyclic_attachments(mol):
+    """
+    Remove exocyclic and exolinker attachments from
+    a molecule.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        Molecule with exocyclic/exolinker attachments
+        removed.
+
+    """
+    edit = RWMol(mol)
+    remove_atoms = set()
+    for atom in edit.GetAtoms():
+        degree = atom.GetDegree()
+        if degree == 1:
+            bond = atom.GetBonds()[0]
+            if bond.GetBondTypeAsDouble() == 2.0:
+                nbr = bond.GetOtherAtom(atom)
+                hcount = nbr.GetTotalNumHs()
+                nbr.SetNumExplicitHs(hcount + 2)
+                nbr.SetNoImplicit(True)
+                remove_atoms.add(atom.GetIdx())
+    for aix in sorted(remove_atoms, reverse=True):
+        edit.RemoveAtom(aix)
+    rdmolops.AssignRadicals(edit)
+    GetSymmSSSR(edit)
+    return edit.GetMol()
 
 
 def get_murcko_scaffold(mol, generic=False):
