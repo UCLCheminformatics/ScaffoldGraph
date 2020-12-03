@@ -67,3 +67,8 @@ def test_collect_linker_atoms():
 def test_remove_exocylic_attachments(mol):
     edited = remove_exocyclic_attachments(mol)
     assert Chem.MolToSmiles(edited) == canon('CCN1CCc2c(sc(NCNc3ccc(Cl)cc3)c2C#N)C1')
+
+
+def test_genericise_scaffold(mol):
+    generic = genericise_scaffold(mol)
+    assert Chem.MolToSmiles(generic) == canon('CCC1CCC2C(C1)CC(CC(C)CC1CCC(C)CC1)C2CC')
