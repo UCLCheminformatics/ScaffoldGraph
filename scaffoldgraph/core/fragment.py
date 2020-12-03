@@ -514,7 +514,7 @@ def get_murcko_scaffold(mol, generic=False):
     """
     murcko = MurckoScaffold.GetScaffoldForMol(mol)
     if generic:
-        murcko = MurckoScaffold.MakeScaffoldGeneric(murcko)
+        murcko = genericise_scaffold(murcko)
     return murcko
 
 
