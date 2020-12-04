@@ -72,3 +72,11 @@ def test_remove_exocylic_attachments(mol):
 def test_genericise_scaffold(mol):
     generic = genericise_scaffold(mol)
     assert Chem.MolToSmiles(generic) == canon('CCC1CCC2C(C1)CC(CC(C)CC1CCC(C)CC1)C2CC')
+
+
+def test_linker_collapse(mol):
+    from scaffoldgraph.core.fragment import _collapse_linker_bonds
+    collapsed = _collapse_linker_bonds(mol, retain_het=False)
+    assert Chem.MolToSmiles(collapsed) == canon('CN1CCc2c(sc(C(=O)c3ccc(Cl)cc3)c2N)C1')
+    collapsed = _collapse_linker_bonds(mol, retain_het=True)
+    assert Chem.MolToSmiles(collapsed) == canon('CN1CCc2c(sc(NC(=O)Nc3ccc(Cl)cc3)c2N)C1')
