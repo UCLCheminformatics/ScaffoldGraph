@@ -17,13 +17,13 @@ from rdkit.Chem import (
     BondType,
     GetSymmSSSR,
     RemoveHs,
+    MurckoDecompose,
     CHI_UNSPECIFIED,
     SANITIZE_ALL,
     SANITIZE_CLEANUP,
     SANITIZE_CLEANUPCHIRALITY,
     SANITIZE_FINDRADICALS,
 )
-from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from scaffoldgraph.core.scaffold import Scaffold
 
@@ -538,24 +538,45 @@ def _collapse_linker_bonds(mol, retain_het=False):
     return edit
 
 
-def get_murcko_scaffold(mol, generic=False):
+def get_murcko_scaffold(mol, generic=False, remove_exocyclic=False, collapse_linkers=False):
     """Get the murcko scaffold for an input molecule.
 
     Parameters
     ----------
     mol : rdkit.rdchem.Chem.Mol
-    generic : bool
-        If True return a generic scaffold (CSK)
+    generic : bool, optional
+        If True return a generic scaffold (CSK).
+        The default is False.
+    remove_exocyclic : bool, optional
+        If True remove all exocyclic/exolinker
+        attachments. The default is False.
+    collapse_linkers : bool, optional
+        If True collapse linkers into a single
+        chain. The default is False.
 
     Returns
     -------
     murcko : rdkit.Chem.rdchem.Mol
         Murcko scaffold.
 
+    Notes
+    -----
+    If aromaticity is due to exocyclic attachments
+    and these are removed, the molecule will fail
+    any attmept to kekulize. Removing these however
+    may be desirable when generating generic scaffolds.
+
     """
-    murcko = MurckoScaffold.GetScaffoldForMol(mol)
+    murcko = MurckoDecompose(mol)
+    if remove_exocyclic:
+        murcko = remove_exocyclic_attachments(murcko)
     if generic:
         murcko = genericise_scaffold(murcko)
+    if collapse_linkers:
+        murcko = _collapse_linker_bonds(murcko).GetMol()
+    murcko.ClearComputedProps()
+    murcko.UpdatePropertyCache()
+    GetSymmSSSR(murcko)
     return murcko
 
 
@@ -582,7 +603,7 @@ def get_annotated_murcko_scaffold(mol, scaffold=None, as_mol=True):
 
     """
     if not scaffold:
-        scaffold = MurckoScaffold.GetScaffoldForMol(mol)
+        scaffold = get_murcko_scaffold(mol)
     annotated = rdmolops.ReplaceSidechains(mol, scaffold)
     if as_mol:
         return annotated
