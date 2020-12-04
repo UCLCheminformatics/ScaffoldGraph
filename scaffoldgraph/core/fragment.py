@@ -497,6 +497,47 @@ def genericise_scaffold(mol):
     return RemoveHs(out)
 
 
+def _collapse_linker_bonds(mol, retain_het=False):
+    """Private. condense linkers into a single chain.
+
+    Used when constructing collapsed linker Murcko
+    scaffolds and ring topology scaffolds.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+    retain_het : bool, optional
+        If True retain heteroatoms in the linker.
+        The default is False.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.RWMol
+        Mol object with collapsed linkers.
+
+    """
+
+    def collapse(edit):
+        for atom in edit.GetAtoms():
+            if atom.IsInRing():
+                continue
+            nbrs = atom.GetNeighbors()
+            if len(nbrs) == 2 and (
+                retain_het is False or
+                nbrs[0].GetAtomicNum() == atom.GetAtomicNum() or
+                nbrs[1].GetAtomicNum() == atom.GetAtomicNum()
+            ):
+                nix = map(lambda x: x.GetIdx(), nbrs)
+                edit.AddBond(*nix, BondType.SINGLE)
+                edit.RemoveAtom(atom.GetIdx())
+                return collapse(edit)
+        return edit
+
+    edit = RWMol(mol)
+    edit = collapse(edit)
+    return edit
+
+
 def get_murcko_scaffold(mol, generic=False):
     """Get the murcko scaffold for an input molecule.
 
