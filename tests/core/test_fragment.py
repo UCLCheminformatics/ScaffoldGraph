@@ -24,6 +24,10 @@ def test_murcko(mol):
     assert Chem.MolToSmiles(murcko) == canon('O=C(Nc1ccccc1)Nc1cc2c(s1)CNCC2')
     murcko = get_murcko_scaffold(mol, generic=True)
     assert Chem.MolToSmiles(murcko) == canon('CC(CC1CCCCC1)CC1CC2CCCCC2C1')
+    murcko = get_murcko_scaffold(mol, generic=True, remove_exocyclic=True)
+    assert Chem.MolToSmiles(murcko) == canon('C1CCC(CCCC2CC3CCCCC3C2)CC1')
+    murcko = get_murcko_scaffold(mol, generic=True, remove_exocyclic=True, collapse_linkers=True)
+    assert Chem.MolToSmiles(murcko) == canon('C1CCC(C2CC3CCCCC3C2)CC1')
 
 
 def test_annotation(mol):
