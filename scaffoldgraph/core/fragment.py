@@ -693,3 +693,81 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
     recursive_generation(scaffold)
     rdlogger.setLevel(3)
     return [f.mol for f in parents]
+
+
+def _minimize_rings(mol):
+    """Private: Minimize rings in a scaffold.
+
+    In this process, all remaining vertices/atoms of degree two are
+    removed by performing an edge merging operation. The only
+    exception being when both vertices neighbours are connected
+    (i.e. we have a triangle), when edge merging would lead to the
+    loss of a cycle. The result is a minimum cycle topological
+    representation of the original molecule. This function is used
+    in the computation of ring topology scaffolds (Oprea).
+
+    If a ring contains a non-carbon atom, this atom is maintained.
+    Neighbouring ring atoms which are of the same type are merged
+    together into a single atom of the corresponding type.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.RWMol
+        Minimum cycle topological graph.
+
+    """
+    edit = RWMol(mol)
+    remove_atoms = set()
+    for atom in edit.GetAtoms():
+        if atom.GetDegree() == 2:
+            n1, n2 = atom.GetNeighbors()
+            n1_idx, n2_idx = n1.GetIdx(), n2.GetIdx()
+            connected = edit.GetBondBetweenAtoms(n1_idx, n2_idx)
+            if not connected and (
+                n1.GetAtomicNum() == atom.GetAtomicNum() or
+                n2.GetAtomicNum() == atom.GetAtomicNum()
+            ):
+                a_idx = atom.GetIdx()
+                edit.RemoveBond(n1_idx, a_idx)
+                edit.RemoveBond(n2_idx, a_idx)
+                edit.AddBond(n1_idx, n2_idx, BondType.SINGLE)
+                remove_atoms.add(a_idx)
+    for a_idx in sorted(remove_atoms, reverse=True):
+        edit.RemoveAtom(a_idx)
+    return edit
+
+
+def get_ring_toplogy_scaffold(mol):
+    """Generate a ring topology scaffold (Oprea scaffold).
+
+    This type of scaffold was originally described by Pollock
+    and co-workers. The result is a minimum cycle topological
+    representation of the original molecule.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Input molecule for computing a ring topology scaffold.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        An rdkit molecule object containing a ring topology
+        scaffold (Minimum cycle topological graph).
+
+    References
+    ----------
+    .. [1] Pollock, S.N., Coutsias, E.A., Wester, M.J. & Oprea, T.I.
+           (2008) Scaffold topologies. 1. Exhaustive enumeration up
+           to eight rings. J. Chem. Inf. Model. 48, 1304-1310.
+           PMID: 18605680.
+
+    """
+    precursor = get_murcko_scaffold(mol, True, True, True)
+    rts = _minimize_rings(precursor)
+    GetSymmSSSR(rts)
+    return rts.GetMol()
