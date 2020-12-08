@@ -735,6 +735,81 @@ class RingSystem(object):
                     exocyclic = True
         return exocyclic
 
+    def get_bond_connectivity(self):
+        """Return bond connectivity of the ring system.
+
+        The ring connectivity is determined by finding
+        rings that share a common bond. Spiro rings
+        are thus not included in the connectivity.
+
+        Returns
+        -------
+        tuple
+            A tuple of tuples containing ring
+            connectivity information. Each tuple
+            contains the ring indexes of rings
+            connected by a shared bond.
+
+        See Also
+        --------
+        get_atom_connectivity
+
+        """
+        m, connectivity = self.owner, []
+        for index, i in enumerate(self.rix):
+            for j in self.rix[index + 1:]:
+                b1 = m.rings[i].bix
+                b2 = m.rings[j].bix
+                if set(b1).intersection(b2):
+                    connectivity.append((i, j))
+        return tuple(connectivity)
+
+    def get_atom_connectivity(self):
+        """Return atom connectivity of the ring system.
+
+        The ring connectivity is determined by finding
+        rings that share a common atom. Spiro rings
+        are thus included in the connectivity.
+
+        Returns
+        -------
+        tuple
+            A tuple of tuples containing ring
+            connectivity information. Each tuple
+            contains the ring indexes of rings
+            connected by a shared atom.
+
+        See Also
+        --------
+        get_bond_connectivity
+
+        """
+        m, connectivity = self.owner, []
+        for index, i in enumerate(self.rix):
+            for j in self.rix[index + 1:]:
+                a1 = m.rings[i].aix
+                a2 = m.rings[j].aix
+                if set(a1).intersection(a2):
+                    connectivity.append((i, j))
+        return tuple(connectivity)
+
+    def get_spiro_connectivity(self):
+        """Return rings connected only by a shared atom.
+
+        Returns
+        -------
+        tuple
+            A tuple of tuples containing ring
+            connectivity information. Each tuple
+            contains the ring indexes of rings
+            connected by a shared atom but not
+            a shared bond.
+
+        """
+        ac = set(self.get_atom_connectivity())
+        bc = set(self.get_bond_connectivity())
+        return tuple(ac.difference(bc))
+
     def __getitem__(self, index):
         if isinstance(index, slice):
             rings = self.owner.rings

@@ -9,6 +9,7 @@ from loguru import logger
 from rdkit import RDLogger
 from rdkit.Chem import (
     Mol,
+    Atom,
     RWMol,
     MolToSmiles,
     rdmolops,
@@ -771,3 +772,131 @@ def get_ring_toplogy_scaffold(mol):
     rts = _minimize_rings(precursor)
     GetSymmSSSR(rts)
     return rts.GetMol()
+
+
+def _get_rings_with_atom(scaffold, aix):
+    """list: Get indexes of rings containing an atom."""
+    return [rix for rix, r in enumerate(scaffold.rings) if aix in r.aix]
+
+
+def _contract_rings(mol):
+    """Private: Return a molecule with rings contracted.
+
+    Create a new molecule, replacing each ring with one
+    atom. Atoms are connected if the rings they represent
+    are connected by a bond not in any ring. If rings
+    share a common bond, the bond added is double. If rings
+    share an common atom (i.e. spiro rings) the rings are
+    connected with a single bond.
+
+    Used for generating ring connectivity scaffolds.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Scaffold template for ring contraction.
+
+    Returns
+    -------
+    rcs : rdkit.Chem.rdchem.Mol
+        New molecule with contracted rings.
+
+    Notes
+    -----
+    Dummy atoms are used instead of carbon atoms, so that
+    valence constraints are not violated. In ring connectivity
+    scaffolds the valence of a vertex is occaisionaly > 4.
+
+    See Also
+    --------
+    get_ring_connectivity_scaffold
+
+    """
+    # Use a Scaffold object for ring + ring system information.
+    scf, rcs = Scaffold(mol), RWMol()
+
+    # Add a dummy atom for each ring to the empty RWMol.
+    for _ in range(scf.rings.count):
+        rcs.AddAtom(Atom(0))
+
+    # Create bonds between atoms (ring vertices).
+    weak_connections, visited = set(), set()
+    for system in scf.ring_systems:
+        bc = set(system.get_bond_connectivity())
+        ac = set(system.get_atom_connectivity())
+        visited.update(system.aix)
+
+        # link strongly connected rings (DOUBLE)
+        for connection in ac.intersection(bc):
+            rcs.AddBond(*connection, BondType.DOUBLE)
+
+        # link weakly connected rings (SINGLE)
+        for connection in ac.difference(bc):
+            rcs.AddBond(*connection, BondType.SINGLE)
+
+        # link rings connected by a linker (SINGLE)
+        for rix, ring in zip(system.rix, system):
+            to_visit = ring.get_attachment_points()
+            while to_visit:
+                aix = to_visit.pop()
+                for nbr in scf.atoms[aix].GetNeighbors():
+                    idx = nbr.GetIdx()
+                    if idx in visited:
+                        continue
+                    elif nbr.IsInRing():
+                        visited.add(idx)
+                        for nix in _get_rings_with_atom(scf, idx):
+                            c = tuple(sorted((nix, rix)))
+                            weak_connections.add(c)
+                        continue
+                    else:
+                        to_visit.add(idx)
+                        visited.add(idx)
+
+    # Add remaining weak ring connections (SINGLE)
+    for connection in weak_connections:
+        rcs.AddBond(*connection, BondType.SINGLE)
+
+    return rcs.GetMol()
+
+
+def get_ring_connectivity_scaffold(mol, all_single_bonds=False):
+    """Generate a ring connectivity scaffold for a molecule.
+
+    In a ring connectivity scaffold vertices correspond to rings
+    rather than atoms. The bonds between these vertices represent
+    connections between rings. There are two types of connectivity:
+
+    - Strong connectivity: When the connected rings share a common
+    bond in the original molecule.
+
+    - Weak connectivity: When the two rings share an atom (i.e. spiro)
+    or when they are connected by a bond or set of bonds which are not
+    part of any ring (i.e. a linker).
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Input for generating a ring connectivity scaffold.
+    all_single_bonds : bool, optional
+        If True make all bonds within the ring connectivity
+        scaffold single.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        An rdkit molecule containing a ring connectivity scaffold.
+
+    Notes
+    -----
+    Dummy atoms are used instead of carbon atoms, so that
+    valence constraints are not violated. In ring connectivity
+    scaffolds the valence of a vertex is occaisionaly > 4.
+
+    """
+    murcko = get_murcko_scaffold(mol, generic=True, remove_exocyclic=True)
+    rcs = _contract_rings(murcko)
+    if all_single_bonds:
+        for bond in rcs.GetBonds():
+            bond.SetBondType(BondType.SINGLE)
+    return rcs
