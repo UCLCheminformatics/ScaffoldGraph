@@ -114,3 +114,23 @@ def test_ring_topology_extended():
     _test_topology_helper('COc1ccc2[nH]c(S(=O)Cc3ncc(C)c(OC)c3C)nc2c1', 'C1CC1C1C2CC21')  # 8
     _test_topology_helper('O=C(O)COCCN1CCN(C(c2ccccc2)c2ccc(Cl)cc2)CC1', 'C1CC1C(C1CC1)C1CC1')  # 9
     _test_topology_helper('O=C1O[Pt]2(NC3CCCCC3N2)OC1=O', 'C1C2C1C21CC1')  # 10
+
+
+def _test_connectivity_helper(smiles, expected, single=False):
+    mol = Chem.MolFromSmiles(smiles)
+    connectivity = get_ring_connectivity_scaffold(mol, single)
+    assert Chem.MolToSmiles(connectivity) == canon(expected)
+
+
+def test_ring_connectivity():
+    # Test cases from Figure 1 from the paper: Scaffold analysis of pubchem database
+    # as a background for hierarchial scaffold-based visualisation.
+    _test_connectivity_helper('CC(C)CC1=CC=C(C=C1)C(C)C(O)=O', '*', False)
+    _test_connectivity_helper('CC(C)CC1=CC=C(C=C1)C(C)C(O)=O', '*', True)
+    _test_connectivity_helper('CC1=CC(NS(=O)(=O)C2=CC=C(N)C=C2)=NO1', '**', False)
+    _test_connectivity_helper('CC1=CC(NS(=O)(=O)C2=CC=C(N)C=C2)=NO1', '**', True)
+    _test_connectivity_helper('CN1C2=C(C=C(Cl)C=C2)C(=NCC1=O)C1=CC=CC=C1', '**=*', False)
+    _test_connectivity_helper('CN1C2=C(C=C(Cl)C=C2)C(=NCC1=O)C1=CC=CC=C1', '***', True)
+    db00741 = '[H][C@@]12CC[C@](O)(C(=O)CO)[C@@]1(C)C[C@H](O)[C@@]1([H])[C@@]2([H])CCC2=CC(=O)CC[c@]12C'
+    _test_connectivity_helper(db00741, '*=*=*=*', False)
+    _test_connectivity_helper(db00741, '****', True)
