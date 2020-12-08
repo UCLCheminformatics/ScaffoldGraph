@@ -11,6 +11,8 @@ from .core import (
     get_next_murcko_fragments,
     get_all_murcko_fragments,
     get_murcko_scaffold,
+    get_ring_toplogy_scaffold,
+    get_ring_connectivity_scaffold,
 )
 
 from .network import ScaffoldNetwork, HierS
@@ -28,6 +30,8 @@ __all__ = [
     'get_next_murcko_fragments',
     'get_all_murcko_fragments',
     'get_murcko_scaffold',
+    'get_ring_toplogy_scaffold',
+    'get_ring_connectivity_scaffold',
 ]
 
 logger.disable(__name__)
