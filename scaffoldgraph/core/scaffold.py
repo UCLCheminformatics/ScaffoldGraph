@@ -793,6 +793,23 @@ class RingSystem(object):
                     connectivity.append((i, j))
         return tuple(connectivity)
 
+    def get_spiro_connectivity(self):
+        """Return rings connected only by a shared atom.
+
+        Returns
+        -------
+        tuple
+            A tuple of tuples containing ring
+            connectivity information. Each tuple
+            contains the ring indexes of rings
+            connected by a shared atom but not
+            a shared bond.
+
+        """
+        ac = set(self.get_atom_connectivity())
+        bc = set(self.get_bond_connectivity())
+        return tuple(ac.difference(bc))
+
     def __getitem__(self, index):
         if isinstance(index, slice):
             rings = self.owner.rings
