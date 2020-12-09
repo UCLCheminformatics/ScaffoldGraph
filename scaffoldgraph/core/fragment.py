@@ -423,6 +423,57 @@ def partial_sanitization(mol):
     )
 
 
+def flatten_isotopes(mol):
+    """Remove specific isotopes from a molecule.
+
+    This operation is performed in-place.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    """
+    for atom in mol.GetAtoms():
+        atom.SetIsotope(0)
+
+
+def keep_largest_fragment(mol):
+    """Return the largest fragment in a disconnected molecule.
+
+    The largest fragment is simply considered to be the
+    fragment with the largest number of atoms.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        rdkit molecule containg disconnected fragments.
+
+    Returns
+    -------
+    mol : rdkit.Chem.rdchem.Mol
+        Molecule containing the largest disconnected
+        fragment.
+
+    """
+    frags = GetMolFrags(mol, asMols=True)
+    return max(frags, key=lambda x: x.GetNumAtoms())
+
+
+def discharge_and_deradicalize(mol):
+    """Discharge and remove radicals (brute force).
+
+    This operation is performed in-place.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    """
+    for atom in mol.GetAtoms():
+        atom.SetFormalCharge(0)
+        atom.SetNumRadicalElectrons(0)
+
+
 def remove_exocyclic_attachments(mol):
     """
     Remove exocyclic and exolinker attachments from
