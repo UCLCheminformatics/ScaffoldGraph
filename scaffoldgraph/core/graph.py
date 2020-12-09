@@ -260,7 +260,6 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         if init_args.get('flatten_isotopes', False) is True:
             flatten_isotopes(scaffold_rdmol)
         if init_args.get('keep_largest', False) is True:
-            print(MolToSmiles(scaffold_rdmol))
             scaffold_rdmol = keep_largest_fragment(scaffold_rdmol)
         if init_args.get('discharge', False) is True:
             discharge_and_deradicalize(scaffold_rdmol)
