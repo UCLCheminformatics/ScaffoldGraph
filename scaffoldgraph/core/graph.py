@@ -215,10 +215,10 @@ class ScaffoldGraph(nx.DiGraph, ABC):
 
         """
         scaffold_rdmol = get_murcko_scaffold(molecule)
+        if scaffold_rdmol.GetNumAtoms() <= 0:
+            return self._process_no_top_level(molecule)
         scaffold_rdmol = self._preprocess_scaffold(scaffold_rdmol, init_args)
         scaffold = Scaffold(scaffold_rdmol)
-        if not scaffold:
-            return self._process_no_top_level(molecule)
         annotation = None
         if init_args.get('annotate') is True:
             annotation = get_annotated_murcko_scaffold(molecule, scaffold_rdmol, False)
