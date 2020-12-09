@@ -474,7 +474,7 @@ def discharge_and_deradicalize(mol):
     for atom in mol.GetAtoms():
         atom.SetFormalCharge(0)
         atom.SetNumRadicalElectrons(0)
-
+        
 
 def remove_exocyclic_attachments(mol):
     """
