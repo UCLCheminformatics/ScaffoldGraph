@@ -84,7 +84,7 @@ class ScaffoldNetwork(ScaffoldGraph):
         """
         super(ScaffoldNetwork, self).__init__(graph, MurckoRingFragmenter(), 'network')
 
-    def _recursive_constructor(self, child):
+    def _hierarchy_constructor(self, child):
         parents = (p for p in self.fragmenter.fragment(child) if p)
         for parent in parents:
             if parent in self.nodes:
@@ -93,7 +93,7 @@ class ScaffoldNetwork(ScaffoldGraph):
                 self.add_scaffold_node(parent)
                 self.add_scaffold_edge(parent, child)
                 if parent.rings.count > 1:
-                    self._recursive_constructor(parent)
+                    self._hierarchy_constructor(parent)
 
 
 class HierS(ScaffoldGraph):
@@ -177,7 +177,7 @@ class HierS(ScaffoldGraph):
         """
         super(HierS, self).__init__(graph, MurckoRingSystemFragmenter(), 'hiers')
 
-    def _recursive_constructor(self, child):
+    def _hierarchy_constructor(self, child):
         parents = (p for p in self.fragmenter.fragment(child) if p)
         for parent in parents:
             if parent in self.nodes:
@@ -186,4 +186,4 @@ class HierS(ScaffoldGraph):
                 self.add_scaffold_node(parent)
                 self.add_scaffold_edge(parent, child)
                 if parent.ring_systems.count > 1:
-                    self._recursive_constructor(parent)
+                    self._hierarchy_constructor(parent)
