@@ -456,6 +456,8 @@ def keep_largest_fragment(mol):
 
     """
     frags = GetMolFrags(mol, asMols=True)
+    if len(frags) <= 1:
+        return mol
     return max(frags, key=lambda x: x.GetNumAtoms())
 
 
