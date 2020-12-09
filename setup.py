@@ -54,6 +54,14 @@ setup(
         'scaffold tree',
         'scaffold network'
     ],
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Operating System :: OS Independent',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Bio-Informatics',
+        'Topic :: Scientific/Engineering :: Chemistry',
+    ],
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
