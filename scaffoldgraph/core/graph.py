@@ -21,7 +21,14 @@ from rdkit.Chem.rdMolDescriptors import CalcNumRings
 from scaffoldgraph.io import *
 from scaffoldgraph.utils import canonize_smiles
 
-from .fragment import get_murcko_scaffold, get_annotated_murcko_scaffold
+from .fragment import (
+    get_murcko_scaffold,
+    get_annotated_murcko_scaffold,
+    keep_largest_fragment,
+    flatten_isotopes,
+    discharge_and_deradicalize,
+)
+
 from .scaffold import Scaffold
 
 rdlogger = RDLogger.logger()
@@ -84,17 +91,26 @@ class ScaffoldGraph(nx.DiGraph, ABC):
     the ``ScaffoldGraph`` base class. It provides an interface to simplify
     building and querying hierarchial scaffold relationships. Each subclass
     represents a different way of constructing the graph. This can be customized
-    in two ways:
+    in a few ways:
 
-        Implementing the _recursive_constructor function. This function
+        Implementing the _hierarchy_constructor function. This function
         is responsible for taking the next set of fragments and building
         the graph structure (subclasses must implment this function). For
         example in the ScaffoldTree class the funtion uses a prioritization
-        system for determining which scaffold to add to the graph.
+        system for determining which scaffold to add to the graph. This
+        function MUST be implemented.
 
         By providing a ``Fragmenter`` callable to produce the next set of
         scaffolds to be added to the graph, the way in which scaffolds are
         fragmented can be customized.
+
+        By mofifying scaffold initilaization. Scaffold initilization can be customized
+        by mofifying the functions; _initialize_scaffold and _preprocess_scaffold.
+        _initialize scaffold is responsible for creating the top-level scaffold
+        and adding the molecule node, scaffold node and connecting these via an edge.
+        The _initialize_scaffold function also calls the _preprocess_scaffold function
+        which contains optional methods for preprocessing scaffolds, i.e. removing
+        specific isotopes.
 
     See Also
     --------
@@ -129,57 +145,165 @@ class ScaffoldGraph(nx.DiGraph, ABC):
 
         """
         super(ScaffoldGraph, self).__init__(graph, graph_type=graph_type, **attr)
+        self.graph.setdefault('num_linear', 0)    # track number of linear mols.
+        self.graph.setdefault('num_filtered', 0)  # track number of filtered mols.
         self.fragmenter = fragmenter
 
-    def _construct(self, molecules, ring_cutoff=10, progress=False, annotate=True):
+    def _construct(self, molecules, init_args, ring_cutoff=10, progress=False):
         """Private method for graph construction, called by constructors.
+
+        The constructor is fairly generic allowing the user to customise
+        hierarchy construction by changing the _hierarchy_constructor
+        function. The user also has further control of this process and
+        is able to change how a scaffold is initialized (`_initialize_scaffold`),
+        how it is preprocessed (`_preprocess_scaffold`) and how molecules with
+        no top-level scaffold (i.e. linear molecules) are handled.
 
         Parameters
         ----------
         molecules : iterable
             An iterable of rdkit molecules for processing
+        init_args : dict
+            A dictionary containing arguments for scaffold initialization and
+            preprocessing.
         ring_cutoff : int, optional
             Ignore molecules with more than the specified number of rings to avoid
             extended processing times. The default is 10.
-        annotate : bool, optional
-            If True write an annotated murcko scaffold SMILES string to each
-            molecule edge (molecule --> scaffold). The default is True.
-        progress : bool
-            If True show a progress bar monitoring progress. The default is False
+        progress : bool, optional
+            If True show a progress bar monitoring progress. The default is False.
+
+        See Also
+        --------
+        _initialize_scaffold
+        _preprocess_scaffold
+        _process_no_top_level
 
         """
-        rdlogger.setLevel(4)  # Suppress the RDKit logs
-        progress = progress is False
-        desc = self.__class__.__name__
-        for molecule in tqdm(molecules, disable=progress, desc=desc, miniters=1, dynamic_ncols=True):
-            if molecule is None:  # logged in suppliers
+        rdlogger.setLevel(4)  # Supress rdkit logs.
+        desc, progress = self.__class__.__name__, progress is False
+        for molecule in tqdm(
+            molecules, disable=progress, desc=desc,
+            miniters=1, dynamic_ncols=True,
+        ):
+            if molecule is None:
                 continue
             init_molecule_name(molecule)
             if CalcNumRings(molecule) > ring_cutoff:
                 name = molecule.GetProp('_Name')
                 logger.warning(f'Molecule {name} filtered (> {ring_cutoff} rings)')
+                self.graph['num_filtered'] = self.graph.get('num_filtered', 0) + 1
                 continue
-            rdmolops.RemoveStereochemistry(molecule)
-            scaffold = Scaffold(get_murcko_scaffold(molecule))
-            if scaffold:  # Checks that a scaffold has at least 1 atom
-                annotation = None
-                if annotate:
-                    annotation = get_annotated_murcko_scaffold(molecule, scaffold.mol, False)
-                self.add_scaffold_node(scaffold)
-                self.add_molecule_node(molecule)
-                self.add_molecule_edge(molecule, scaffold, annotation=annotation)
-                if scaffold.rings.count > 1:
-                    self._recursive_constructor(scaffold)
-            else:
-                name = molecule.GetProp('_Name')
-                logger.warning(f'No top level scaffold for molecule {name}')
-        rdlogger.setLevel(3)  # Enable the RDKit logs
+            scaffold = self._initialize_scaffold(molecule, init_args)
+            if scaffold is not None:
+                self._hierarchy_constructor(scaffold)
+        rdlogger.setLevel(3)  # Enable rdkit logs.
+
+    def _initialize_scaffold(self, molecule, init_args):
+        """Initialize the top-level scaffold for a molecule.
+
+        Initialization generates a murcko scaffold, performs
+        any preprocessing required and then adds the scaffold
+        node to the graph connecting it to its child molecule.
+        This process can be customised in subclasses to modify
+        how a scaffold is initialized.
+
+        Parameters
+        ----------
+        molecule : rdkit.Chem.rdchem.Mol
+            A molecule from whicg to initialize a scaffold.
+        init_args : dict
+            A dictionary containing arguments for scaffold
+            initialization and preprocessing.
+
+        Returns
+        -------
+        scaffold : Scaffold
+            A Scaffold object containing the initialized
+            scaffold to be processed further (hierarchy
+            generation).
+
+        """
+        scaffold_rdmol = get_murcko_scaffold(molecule)
+        if scaffold_rdmol.GetNumAtoms() <= 0:
+            return self._process_no_top_level(molecule)
+        scaffold_rdmol = self._preprocess_scaffold(scaffold_rdmol, init_args)
+        scaffold = Scaffold(scaffold_rdmol)
+        annotation = None
+        if init_args.get('annotate') is True:
+            annotation = get_annotated_murcko_scaffold(molecule, scaffold_rdmol, False)
+        self.add_scaffold_node(scaffold)
+        self.add_molecule_node(molecule)
+        self.add_molecule_edge(molecule, scaffold, annotation=annotation)
+        return scaffold
+
+    def _preprocess_scaffold(self, scaffold_rdmol, init_args):
+        """Preprocess a scaffold before initialization.
+
+        When subclassing a user is able to customize/extend
+        preprocessing options to suit their needs. The default
+        method has the option to; remove stereochemistry,
+        remove specific isotopes, keep the largest disconnected
+        fragment and discharge and deradicalize a molecule. The
+        options are controlled by the init_args dictionary. This
+        argument dictionary is formed by the constructors. Note
+        that the stereochemistry argument is specific to the
+        hierarchy generating method so isn't specified in the
+        constructors.
+
+        Parameters
+        ----------
+        scaffold_rdmol : rdkit.Chem.rdchem.Mol
+            rdkit molecule of scaffold to be preprocessed
+        init_args : dict
+            A dictionary containing arguments for scaffold initialization
+            and preprocessing.
+
+        Returns
+        -------
+        scaffold_rdmol : rdkit.Chem.rdchem.Mol
+            rdkit molecule containing preprocessed scaffold.
+
+        """
+        if init_args.get('remove_stereo', True) is True:
+            rdmolops.RemoveStereochemistry(scaffold_rdmol)
+        if init_args.get('flatten_isotopes', False) is True:
+            flatten_isotopes(scaffold_rdmol)
+        if init_args.get('keep_largest', False) is True:
+            scaffold_rdmol = keep_largest_fragment(scaffold_rdmol)
+        if init_args.get('discharge', False) is True:
+            discharge_and_deradicalize(scaffold_rdmol)
+        return scaffold_rdmol
+
+    def _process_no_top_level(self, molecule):
+        """Private: Process molecules with no top-level scaffold.
+
+        Can be overwritten to change the behaviour when a molecule
+        does not contain a top-level scaffold (i.e. is linear). By
+        default a warning is logged and the molecule is counted to
+        the num_linear graph attribute (`self.graph['num_linear']`).
+        The molecule node is not added to the graph.
+
+        If for example a user wanted to track what molecules do not
+        have a top level scaffold, they could overide this function
+        to append the names of these molecules to a list, or indeed
+        add them to the graph.
+
+        Parameters
+        ----------
+        molecule : rdkit.Chem.rdchem.Mol
+            An rdkit molecule determined to have no top-level scaffold.
+
+        """
+        name = molecule.GetProp('_Name')
+        logger.warning(f'No top level scaffold for molecule: {name}')
+        self.graph['num_linear'] = self.graph.get('num_linear', 0) + 1
+        return None
 
     @abstractmethod
-    def _recursive_constructor(self, child):
+    def _hierarchy_constructor(self, child):
         """
-        This method should be implemented by the subclass, used during recursive
-        fragmentation of a scaffold.
+        This method should be implemented by the subclass, used during
+        fragmentation of a scaffold to generate a scaffold hierarchy.
 
         Parameters
         ----------
@@ -655,7 +779,9 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         )
 
     @classmethod
-    def from_sdf(cls, file_name, ring_cutoff=10, progress=False, annotate=True, zipped=False, **kwargs):
+    def from_sdf(cls, file_name, ring_cutoff=10, progress=False, annotate=True,
+                 zipped=False, flatten_isotopes=False, keep_largest_fragment=False,
+                 discharge_and_deradicalize=False, **kwargs):
         """Construct a ScaffoldGraph from an SDF file.
 
         Parameters
@@ -671,10 +797,20 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         annotate : bool, optional
             If True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold). The default is True.
+        flatten_isotopes : bool, optional
+            If True remove specific isotopes when initializing the scaffold.
+            The default is False.
+        keep_largest_fragment : bool, optional
+            If True when encountering molecules containing disconnected fragments
+            initialize the scaffold from only the largest disconnected fragment.
+            The default is False.
+        discharge_and_deradicalize : bool, optional
+            If True remove charges and radicals when initializing the scaffold.
+            The default is False.
         zipped : bool, optional
             If True input file is compressed with gzip. The default is False.
         **kwargs : keyword arguments, optional
-            Arguments to pass to the ScaffoldGraph initilaizer.
+            Arguments to pass to the ScaffoldGraph initializer.
 
         """
         if zipped:
@@ -683,14 +819,20 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             sdf = open(file_name, 'rb')
         supplier = read_sdf(sdf, requires_length=progress is True)
         instance = cls(**kwargs)
-        instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        init_args = dict(
+            flatten_isotopes=flatten_isotopes,
+            keep_largest=keep_largest_fragment,
+            discharge=discharge_and_deradicalize,
+            annotate=annotate,
+        )
+        instance._construct(supplier, init_args, ring_cutoff=ring_cutoff, progress=progress)
         sdf.close()
         return instance
 
     @classmethod
     def from_smiles_file(cls, file_name, delimiter=' ', smiles_column=0, name_column=1, header=False,
-                         ring_cutoff=10, progress=False, annotate=True, **kwargs):
-
+                         ring_cutoff=10, progress=False, annotate=True, flatten_isotopes=False,
+                         keep_largest_fragment=False, discharge_and_deradicalize=False, **kwargs):
         """Construct a ScaffoldGraph from a SMILES file.
 
         Parameters
@@ -713,18 +855,38 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         annotate : bool, optional
             If True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold). The default is True.
+        flatten_isotopes : bool, optional
+            If True remove specific isotopes when initializing the scaffold.
+            The default is False.
+        keep_largest_fragment : bool, optional
+            If True when encountering molecules containing disconnected fragments
+            initialize the scaffold from only the largest disconnected fragment.
+            The default is False.
+        discharge_and_deradicalize : bool, optional
+            If True remove charges and radicals when initializing the scaffold.
+            The default is False.
         **kwargs : keyword arguments, optional
-            Arguments to pass to the ScaffoldGraph initilaizer.
+            Arguments to pass to the ScaffoldGraph initializer.
 
         """
-        supplier = read_smiles_file(file_name, delimiter, smiles_column, name_column,
-                                    header, requires_length=progress is True)
+        supplier = read_smiles_file(
+            file_name, delimiter, smiles_column, name_column,
+            header, requires_length=progress is True
+        )
         instance = cls(**kwargs)
-        instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        init_args = dict(
+            flatten_isotopes=flatten_isotopes,
+            keep_largest=keep_largest_fragment,
+            discharge=discharge_and_deradicalize,
+            annotate=annotate,
+        )
+        instance._construct(supplier, init_args, ring_cutoff=ring_cutoff, progress=progress)
         return instance
 
     @classmethod
-    def from_supplier(cls, supplier, ring_cutoff=10, progress=False, annotate=True, **kwargs):
+    def from_supplier(cls, supplier, ring_cutoff=10, progress=False, annotate=True,
+                      flatten_isotopes=False, keep_largest_fragment=False,
+                      discharge_and_deradicalize=False, **kwargs):
         """Construct a ScaffoldGraph from a custom rdkit Mol supplier.
 
         A simple supplier could be a list of rdkit molecules or a supplier provided by rdkit.
@@ -743,8 +905,18 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         annotate : bool, optional
             If True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold). The default is True.
+        flatten_isotopes : bool, optional
+            If True remove specific isotopes when initializing the scaffold.
+            The default is False.
+        keep_largest_fragment : bool, optional
+            If True when encountering molecules containing disconnected fragments
+            initialize the scaffold from only the largest disconnected fragment.
+            The default is False.
+        discharge_and_deradicalize : bool, optional
+            If True remove charges and radicals when initializing the scaffold.
+            The default is False.
         **kwargs : keyword arguments, optional
-            Arguments to pass to the ScaffoldGraph initilaizer.
+            Arguments to pass to the ScaffoldGraph initializer.
 
         Notes
         -----
@@ -753,13 +925,19 @@ class ScaffoldGraph(nx.DiGraph, ABC):
 
         """
         instance = cls(**kwargs)
-        instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        init_args = dict(
+            flatten_isotopes=flatten_isotopes,
+            keep_largest=keep_largest_fragment,
+            discharge=discharge_and_deradicalize,
+            annotate=annotate,
+        )
+        instance._construct(supplier, init_args, ring_cutoff=ring_cutoff, progress=progress)
         return instance
 
     @classmethod
     def from_dataframe(cls, df, smiles_column='Smiles', name_column='Name', data_columns=None,
-                       ring_cutoff=10, progress=False, annotate=True, **kwargs):
-
+                       ring_cutoff=10, progress=False, annotate=True, flatten_isotopes=False,
+                       keep_largest_fragment=False, discharge_and_deradicalize=False, **kwargs):
         """Construct a ScaffoldGraph from a pandas DataFrame.
 
         Parameters
@@ -780,13 +958,29 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         annotate : bool, optional
             If True write an annotated murcko scaffold SMILES string to each
             molecule edge (molecule --> scaffold). The default is True.
+        flatten_isotopes : bool, optional
+            If True remove specific isotopes when initializing the scaffold.
+            The default is False.
+        keep_largest_fragment : bool, optional
+            If True when encountering molecules containing disconnected fragments
+            initialize the scaffold from only the largest disconnected fragment.
+            The default is False.
+        discharge_and_deradicalize : bool, optional
+            If True remove charges and radicals when initializing the scaffold.
+            The default is False.
         **kwargs : keyword arguments, optional
-            Arguments to pass to the ScaffoldGraph initilaizer.
+            Arguments to pass to the ScaffoldGraph initializer.
 
         """
         supplier = read_dataframe(df, smiles_column, name_column, data_columns)
         instance = cls(**kwargs)
-        instance._construct(supplier, ring_cutoff=ring_cutoff, progress=progress, annotate=annotate)
+        init_args = dict(
+            flatten_isotopes=flatten_isotopes,
+            keep_largest=keep_largest_fragment,
+            discharge=discharge_and_deradicalize,
+            annotate=annotate,
+        )
+        instance._construct(supplier, init_args, ring_cutoff=ring_cutoff, progress=progress)
         return instance
 
     def __repr__(self):

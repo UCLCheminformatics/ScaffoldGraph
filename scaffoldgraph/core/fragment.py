@@ -8,19 +8,23 @@ from loguru import logger
 
 from rdkit import RDLogger
 from rdkit.Chem import (
+    Mol,
+    Atom,
     RWMol,
     MolToSmiles,
     rdmolops,
     SanitizeMol,
     GetMolFrags,
     BondType,
+    GetSymmSSSR,
+    RemoveHs,
+    MurckoDecompose,
     CHI_UNSPECIFIED,
     SANITIZE_ALL,
     SANITIZE_CLEANUP,
     SANITIZE_CLEANUPCHIRALITY,
     SANITIZE_FINDRADICALS,
 )
-from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from scaffoldgraph.core.scaffold import Scaffold
 
@@ -419,24 +423,214 @@ def partial_sanitization(mol):
     )
 
 
-def get_murcko_scaffold(mol, generic=False):
+def flatten_isotopes(mol):
+    """Remove specific isotopes from a molecule.
+
+    This operation is performed in-place.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    """
+    for atom in mol.GetAtoms():
+        atom.SetIsotope(0)
+
+
+def keep_largest_fragment(mol):
+    """Return the largest fragment in a disconnected molecule.
+
+    The largest fragment is simply considered to be the
+    fragment with the largest number of atoms.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        rdkit molecule containg disconnected fragments.
+
+    Returns
+    -------
+    mol : rdkit.Chem.rdchem.Mol
+        Molecule containing the largest disconnected
+        fragment.
+
+    """
+    frags = GetMolFrags(mol, asMols=True)
+    if len(frags) <= 1:
+        return mol
+    return max(frags, key=lambda x: x.GetNumAtoms())
+
+
+def discharge_and_deradicalize(mol):
+    """Discharge and remove radicals (brute force).
+
+    This operation is performed in-place.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    """
+    for atom in mol.GetAtoms():
+        atom.SetFormalCharge(0)
+        atom.SetNumRadicalElectrons(0)
+        
+
+def remove_exocyclic_attachments(mol):
+    """
+    Remove exocyclic and exolinker attachments from
+    a molecule.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        Molecule with exocyclic/exolinker attachments
+        removed.
+
+    """
+    edit = RWMol(mol)
+    remove_atoms = set()
+    for atom in edit.GetAtoms():
+        degree = atom.GetDegree()
+        if degree == 1:
+            bond = atom.GetBonds()[0]
+            if bond.GetBondTypeAsDouble() == 2.0:
+                nbr = bond.GetOtherAtom(atom)
+                hcount = nbr.GetTotalNumHs()
+                nbr.SetNumExplicitHs(hcount + 2)
+                nbr.SetNoImplicit(True)
+                remove_atoms.add(atom.GetIdx())
+    for aix in sorted(remove_atoms, reverse=True):
+        edit.RemoveAtom(aix)
+    rdmolops.AssignRadicals(edit)
+    GetSymmSSSR(edit)
+    return edit.GetMol()
+
+
+def genericise_scaffold(mol):
+    """Make a scaffold generic.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Molecule to make generic.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        Genericised scaffold.
+
+    Notes
+    -----
+    Copy pasta'd from rdkit Murcko Scaffold module.
+    Adds a degree check to make sure output will
+    not fail sanitization when an atom has a degree
+    > 4. Achieved by using a dummy atom to replace
+    such atoms.
+
+    """
+    out = Mol(mol)
+    for atom in out.GetAtoms():
+        if atom.GetAtomicNum() != 1:
+            if atom.GetDegree() <= 4:
+                atom.SetAtomicNum(6)
+            else:
+                atom.SetAtomicNum(0)
+        atom.SetIsAromatic(False)
+        atom.SetFormalCharge(0)
+        atom.SetChiralTag(CHI_UNSPECIFIED)
+        atom.SetNoImplicit(0)
+        atom.SetNumExplicitHs(0)
+    for bond in out.GetBonds():
+        bond.SetBondType(BondType.SINGLE)
+        bond.SetIsAromatic(False)
+    return RemoveHs(out)
+
+
+def _collapse_linker_bonds(mol, retain_het=False):
+    """Private. condense linkers into a single chain.
+
+    Used when constructing collapsed linker Murcko
+    scaffolds and ring topology scaffolds.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+    retain_het : bool, optional
+        If True retain heteroatoms in the linker.
+        The default is False.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.RWMol
+        Mol object with collapsed linkers.
+
+    """
+
+    def collapse(edit):
+        for atom in edit.GetAtoms():
+            if atom.IsInRing():
+                continue
+            nbrs = atom.GetNeighbors()
+            if len(nbrs) == 2 and (
+                retain_het is False or
+                nbrs[0].GetAtomicNum() == atom.GetAtomicNum() or
+                nbrs[1].GetAtomicNum() == atom.GetAtomicNum()
+            ):
+                nix = map(lambda x: x.GetIdx(), nbrs)
+                edit.AddBond(*nix, BondType.SINGLE)
+                edit.RemoveAtom(atom.GetIdx())
+                return collapse(edit)
+        return edit
+
+    edit = RWMol(mol)
+    edit = collapse(edit)
+    return edit
+
+
+def get_murcko_scaffold(mol, generic=False, remove_exocyclic=False, collapse_linkers=False):
     """Get the murcko scaffold for an input molecule.
 
     Parameters
     ----------
     mol : rdkit.rdchem.Chem.Mol
-    generic : bool
-        If True return a generic scaffold (CSK)
+    generic : bool, optional
+        If True return a generic scaffold (CSK).
+        The default is False.
+    remove_exocyclic : bool, optional
+        If True remove all exocyclic/exolinker
+        attachments. The default is False.
+    collapse_linkers : bool, optional
+        If True collapse linkers into a single
+        chain. The default is False.
 
     Returns
     -------
     murcko : rdkit.Chem.rdchem.Mol
         Murcko scaffold.
 
+    Notes
+    -----
+    If aromaticity is due to exocyclic attachments
+    and these are removed, the molecule will fail
+    any attmept to kekulize. Removing these however
+    may be desirable when generating generic scaffolds.
+
     """
-    murcko = MurckoScaffold.GetScaffoldForMol(mol)
+    murcko = MurckoDecompose(mol)
+    if remove_exocyclic:
+        murcko = remove_exocyclic_attachments(murcko)
     if generic:
-        murcko = MurckoScaffold.MakeScaffoldGeneric(murcko)
+        murcko = genericise_scaffold(murcko)
+    if collapse_linkers:
+        murcko = _collapse_linker_bonds(murcko).GetMol()
+    murcko.ClearComputedProps()
+    murcko.UpdatePropertyCache()
+    GetSymmSSSR(murcko)
     return murcko
 
 
@@ -463,7 +657,7 @@ def get_annotated_murcko_scaffold(mol, scaffold=None, as_mol=True):
 
     """
     if not scaffold:
-        scaffold = MurckoScaffold.GetScaffoldForMol(mol)
+        scaffold = get_murcko_scaffold(mol)
     annotated = rdmolops.ReplaceSidechains(mol, scaffold)
     if as_mol:
         return annotated
@@ -553,3 +747,209 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
     recursive_generation(scaffold)
     rdlogger.setLevel(3)
     return [f.mol for f in parents]
+
+
+def _minimize_rings(mol):
+    """Private: Minimize rings in a scaffold.
+
+    In this process, all remaining vertices/atoms of degree two are
+    removed by performing an edge merging operation. The only
+    exception being when both vertices neighbours are connected
+    (i.e. we have a triangle), when edge merging would lead to the
+    loss of a cycle. The result is a minimum cycle topological
+    representation of the original molecule. This function is used
+    in the computation of ring topology scaffolds (Oprea).
+
+    If a ring contains a non-carbon atom, this atom is maintained.
+    Neighbouring ring atoms which are of the same type are merged
+    together into a single atom of the corresponding type.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.RWMol
+        Minimum cycle topological graph.
+
+    """
+    edit = RWMol(mol)
+    remove_atoms = set()
+    for atom in edit.GetAtoms():
+        if atom.GetDegree() == 2:
+            n1, n2 = atom.GetNeighbors()
+            n1_idx, n2_idx = n1.GetIdx(), n2.GetIdx()
+            connected = edit.GetBondBetweenAtoms(n1_idx, n2_idx)
+            if not connected and (
+                n1.GetAtomicNum() == atom.GetAtomicNum() or
+                n2.GetAtomicNum() == atom.GetAtomicNum()
+            ):
+                a_idx = atom.GetIdx()
+                edit.RemoveBond(n1_idx, a_idx)
+                edit.RemoveBond(n2_idx, a_idx)
+                edit.AddBond(n1_idx, n2_idx, BondType.SINGLE)
+                remove_atoms.add(a_idx)
+    for a_idx in sorted(remove_atoms, reverse=True):
+        edit.RemoveAtom(a_idx)
+    return edit
+
+
+def get_ring_toplogy_scaffold(mol):
+    """Generate a ring topology scaffold (Oprea scaffold).
+
+    This type of scaffold was originally described by Pollock
+    and co-workers. The result is a minimum cycle topological
+    representation of the original molecule.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Input molecule for computing a ring topology scaffold.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        An rdkit molecule object containing a ring topology
+        scaffold (Minimum cycle topological graph).
+
+    References
+    ----------
+    .. [1] Pollock, S.N., Coutsias, E.A., Wester, M.J. & Oprea, T.I.
+           (2008) Scaffold topologies. 1. Exhaustive enumeration up
+           to eight rings. J. Chem. Inf. Model. 48, 1304-1310.
+           PMID: 18605680.
+
+    """
+    precursor = get_murcko_scaffold(mol, True, True, True)
+    rts = _minimize_rings(precursor)
+    GetSymmSSSR(rts)
+    return rts.GetMol()
+
+
+def _get_rings_with_atom(scaffold, aix):
+    """list: Get indexes of rings containing an atom."""
+    return [rix for rix, r in enumerate(scaffold.rings) if aix in r.aix]
+
+
+def _contract_rings(mol):
+    """Private: Return a molecule with rings contracted.
+
+    Create a new molecule, replacing each ring with one
+    atom. Atoms are connected if the rings they represent
+    are connected by a bond not in any ring. If rings
+    share a common bond, the bond added is double. If rings
+    share an common atom (i.e. spiro rings) the rings are
+    connected with a single bond.
+
+    Used for generating ring connectivity scaffolds.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Scaffold template for ring contraction.
+
+    Returns
+    -------
+    rcs : rdkit.Chem.rdchem.Mol
+        New molecule with contracted rings.
+
+    Notes
+    -----
+    Dummy atoms are used instead of carbon atoms, so that
+    valence constraints are not violated. In ring connectivity
+    scaffolds the valence of a vertex is occaisionaly > 4.
+
+    See Also
+    --------
+    get_ring_connectivity_scaffold
+
+    """
+    # Use a Scaffold object for ring + ring system information.
+    scf, rcs = Scaffold(mol), RWMol()
+
+    # Add a dummy atom for each ring to the empty RWMol.
+    for _ in range(scf.rings.count):
+        rcs.AddAtom(Atom(0))
+
+    # Create bonds between atoms (ring vertices).
+    weak_connections, visited = set(), set()
+    for system in scf.ring_systems:
+        bc = set(system.get_bond_connectivity())
+        ac = set(system.get_atom_connectivity())
+        visited.update(system.aix)
+
+        # link strongly connected rings (DOUBLE)
+        for connection in ac.intersection(bc):
+            rcs.AddBond(*connection, BondType.DOUBLE)
+
+        # link weakly connected rings (SINGLE)
+        for connection in ac.difference(bc):
+            rcs.AddBond(*connection, BondType.SINGLE)
+
+        # link rings connected by a linker (SINGLE)
+        for rix, ring in zip(system.rix, system):
+            to_visit = ring.get_attachment_points()
+            while to_visit:
+                aix = to_visit.pop()
+                for nbr in scf.atoms[aix].GetNeighbors():
+                    idx = nbr.GetIdx()
+                    if idx in visited:
+                        continue
+                    elif nbr.IsInRing():
+                        visited.add(idx)
+                        for nix in _get_rings_with_atom(scf, idx):
+                            c = tuple(sorted((nix, rix)))
+                            weak_connections.add(c)
+                        continue
+                    else:
+                        to_visit.add(idx)
+                        visited.add(idx)
+
+    # Add remaining weak ring connections (SINGLE)
+    for connection in weak_connections:
+        rcs.AddBond(*connection, BondType.SINGLE)
+
+    return rcs.GetMol()
+
+
+def get_ring_connectivity_scaffold(mol, all_single_bonds=False):
+    """Generate a ring connectivity scaffold for a molecule.
+
+    In a ring connectivity scaffold vertices correspond to rings
+    rather than atoms. The bonds between these vertices represent
+    connections between rings. There are two types of connectivity:
+
+    - Strong connectivity: When the connected rings share a common
+    bond in the original molecule.
+
+    - Weak connectivity: When the two rings share an atom (i.e. spiro)
+    or when they are connected by a bond or set of bonds which are not
+    part of any ring (i.e. a linker).
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+        Input for generating a ring connectivity scaffold.
+    all_single_bonds : bool, optional
+        If True make all bonds within the ring connectivity
+        scaffold single.
+
+    Returns
+    -------
+    rdkit.Chem.rdchem.Mol
+        An rdkit molecule containing a ring connectivity scaffold.
+
+    Notes
+    -----
+    Dummy atoms are used instead of carbon atoms, so that
+    valence constraints are not violated. In ring connectivity
+    scaffolds the valence of a vertex is occaisionaly > 4.
+
+    """
+    murcko = get_murcko_scaffold(mol, generic=True, remove_exocyclic=True)
+    rcs = _contract_rings(murcko)
+    if all_single_bonds:
+        for bond in rcs.GetBonds():
+            bond.SetBondType(BondType.SINGLE)
+    return rcs
