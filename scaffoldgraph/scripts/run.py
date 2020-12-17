@@ -80,12 +80,19 @@ def parent_parser():
 
 
 def generate_parent_parser():
-    """Creates a parent parser for generate commands (Network, Tree)."""
+    """Creates a parent parser for generate commands (Network, Tree, HierS)."""
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument('input', help='input file (SDF, SMILES)')
     parser.add_argument('output', help='output file path')
     parser.add_argument('--max-rings', '-m', type=int, default=10, metavar='',
                         help='ignore molecules with # rings > (default: 10)')
+    parser.add_argument('--flatten-isotopes', '-i', action='store_true',
+                        help='remove remove specific isotopes when initializing the scaffold')
+    parser.add_argument('--keep_largest_fragment', '-f', action='store_true',
+                        help='when encountering molecules containing disconnected fragments initialize'
+                        ' the scaffold from only the largest disconnected fragment')
+    parser.add_argument('--discharge-and-deradicalize', '-d', action='store_true',
+                        help='remove charges and radicals when initializing the scaffold')
     return parser
 
 

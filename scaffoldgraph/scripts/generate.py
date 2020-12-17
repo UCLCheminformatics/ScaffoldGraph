@@ -18,12 +18,17 @@ Running ScaffoldGraph ({command}) Generation with options:
     Input file:     {input}
     Output file:    {output}
     Maximum rings:  {max_r}
+    Flatten isotopes: {isotope}
+    Keep largest Fragment: {fragment}
+    Discharge & Deradicalize: {discharge}
 """
 
 stop_message = """
 ScaffoldGraph Generation Complete:
     Molecules written: {molecules}
     Scaffolds written: {scaffolds}
+    Molecules filtered: {filtered}
+    Linear molecules: {linear}
     Time elapsed: {time}
     
 Output saved @ {output}
@@ -64,7 +69,10 @@ def generate_cli(args):
                 command=graph_name,
                 input=args.input,
                 output=args.output,
-                max_r=args.max_rings
+                max_r=args.max_rings,
+                isotope=args.flatten_isotopes,
+                fragment=args.keep_largest_fragment,
+                discharge=args.discharge_and_deradicalize,
             )
         )
 
@@ -78,6 +86,9 @@ def generate_cli(args):
             ring_cutoff=args.max_rings,
             progress=args.silent is False,
             zipped=zipped,
+            flatten_isotopes=args.flatten_isotopes,
+            keep_largest_fragment=args.keep_largest_fragment,
+            discharge_and_deradicalize=args.discharge_and_deradicalize,
             prioritization_rules=ruleset,
         )
     elif fmt == 'SMI':
@@ -85,6 +96,9 @@ def generate_cli(args):
             args.input,
             ring_cutoff=args.max_rings,
             progress=args.silent is False,
+            flatten_isotopes=args.flatten_isotopes,
+            keep_largest_fragment=args.keep_largest_fragment,
+            discharge_and_deradicalize=args.discharge_and_deradicalize,
             prioritization_rules=ruleset,
         )
     else:
@@ -93,12 +107,16 @@ def generate_cli(args):
     tsv.write_tsv(sg, args.output, write_ids=False)
     logger.info(f'{graph_name} Graph Generation Complete...')
     elapsed = datetime.timedelta(seconds=round(time.time() - start))
+    filtered = sg.graph['num_filtered']
+    linear = sg.graph['num_linear']
 
     if not args.silent:
         print(
             stop_message.format(
                 molecules=sg.num_molecule_nodes,
                 scaffolds=sg.num_scaffold_nodes,
+                filtered=filtered,
+                linear=linear,
                 time=elapsed,
                 output=args.output
             )
