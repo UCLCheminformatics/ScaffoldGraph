@@ -6,7 +6,7 @@ Utilities for dealing with rdkit logging.
 
 import functools
 
-from rdkit import __version__ as rdkversion
+from rdkit import __version__ as rdversion
 from rdkit import RDLogger, rdBase
 
 
@@ -81,7 +81,7 @@ def supress_rdlogger(
         def wrap_supress(*args, **kwargs):
             # rdkit version compatability.
             prior_status = DEFAULT_RDLOGGER_STATUS
-            if rdkversion >= '2020.09.01':
+            if rdversion >= '2020.09.01':
                 prior_status = get_rdlogger_status()
             set_rdlogger_status(altered_status)
             try:  # restore status of rdlogger on failure.
