@@ -8,18 +8,18 @@ from abc import ABC, abstractmethod
 from collections import Counter
 
 import networkx as nx
-import rdkit
 import gzip
 
 from loguru import logger
 from tqdm.auto import tqdm
 
 from rdkit import RDLogger
+from rdkit import __version__ as rdversion
 from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
-from scaffoldgraph.utils import canonize_smiles
+from scaffoldgraph.utils import canonize_smiles, supress_rdlogger
 
 from .fragment import (
     get_murcko_scaffold,
@@ -30,9 +30,6 @@ from .fragment import (
 )
 
 from .scaffold import Scaffold
-
-rdlogger = RDLogger.logger()
-rdversion = rdkit.__version__
 
 
 def init_molecule_name(mol):
@@ -149,6 +146,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         self.graph.setdefault('num_filtered', 0)  # track number of filtered mols.
         self.fragmenter = fragmenter
 
+    @supress_rdlogger()
     def _construct(self, molecules, init_args, ring_cutoff=10, progress=False):
         """Private method for graph construction, called by constructors.
 
@@ -179,7 +177,6 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         _process_no_top_level
 
         """
-        rdlogger.setLevel(4)  # Supress rdkit logs.
         desc, progress = self.__class__.__name__, progress is False
         for molecule in tqdm(
             molecules, disable=progress, desc=desc,
@@ -196,7 +193,6 @@ class ScaffoldGraph(nx.DiGraph, ABC):
             scaffold = self._initialize_scaffold(molecule, init_args)
             if scaffold is not None:
                 self._hierarchy_constructor(scaffold)
-        rdlogger.setLevel(3)  # Enable rdkit logs.
 
     def _initialize_scaffold(self, molecule, init_args):
         """Initialize the top-level scaffold for a molecule.

@@ -27,8 +27,7 @@ from rdkit.Chem import (
 )
 
 from scaffoldgraph.core.scaffold import Scaffold
-
-rdlogger = RDLogger.logger()
+from scaffoldgraph.utils import supress_rdlogger
 
 
 class Fragmenter(ABC):
@@ -666,6 +665,7 @@ def get_annotated_murcko_scaffold(mol, scaffold=None, as_mol=True):
     return MolToSmiles(annotated)
 
 
+@supress_rdlogger()
 def get_next_murcko_fragments(murcko_scaffold, break_fused_rings=True):
     """
     Fragment a scaffold into its next set of Murcko fragments.
@@ -686,19 +686,16 @@ def get_next_murcko_fragments(murcko_scaffold, break_fused_rings=True):
         A list of parent scaffolds (next hierarchy [num_rings - 1])
 
     """
-    rdlogger.setLevel(4)
-
     if break_fused_rings:
         fragmenter = MurckoRingFragmenter()
     else:
         fragmenter = MurckoRingSystemFragmenter()
-
     parents = [f.mol for f in set(fragmenter.fragment(Scaffold(murcko_scaffold)))]
-    rdlogger.setLevel(3)
     return parents
 
 
 # fragmenter is hierarchical so all fragments may not be returned (fix?).
+@supress_rdlogger()
 def get_all_murcko_fragments(mol, break_fused_rings=True):
     """
     Get all possible murcko fragments from a molecule through
@@ -725,13 +722,10 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
     >>> frags = get_all_murcko_fragments(molecule)
 
     """
-    rdlogger.setLevel(4)
-
     if break_fused_rings:
         fragmenter = MurckoRingFragmenter()
     else:
         fragmenter = MurckoRingSystemFragmenter()
-
     mol = get_murcko_scaffold(mol)
     rdmolops.RemoveStereochemistry(mol)
     scaffold = Scaffold(mol)
@@ -745,7 +739,6 @@ def get_all_murcko_fragments(mol, break_fused_rings=True):
             recursive_generation(parent)
 
     recursive_generation(scaffold)
-    rdlogger.setLevel(3)
     return [f.mol for f in parents]
 
 
