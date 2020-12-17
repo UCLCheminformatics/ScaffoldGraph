@@ -121,6 +121,9 @@ Where "command" is one of: tree, network, hiers, aggregate or select.
     
     ```
     --max-rings, -m : ignore molecules with # rings > N (default: 10)
+    --flatten-isotopes -i : remove specific isotopes
+    --keep-largest-fragment -f : only process the largest disconnected fragment
+    --discharge-and-deradicalize -d : remove charges and radicals from scaffolds 
     ```
     
 - #### Aggregating Scaffold Graphs
