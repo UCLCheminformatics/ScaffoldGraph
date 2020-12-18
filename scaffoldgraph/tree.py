@@ -8,8 +8,7 @@ from rdkit.Chem import rdmolops
 from .core import ScaffoldGraph, Scaffold, MurckoRingFragmenter
 from .core.fragment import get_murcko_scaffold
 from .prioritization import original_ruleset
-
-rdlogger = RDLogger.logger()
+from .utils import supress_rdlogger
 
 
 class ScaffoldTree(ScaffoldGraph):
@@ -114,6 +113,7 @@ class ScaffoldTree(ScaffoldGraph):
         return self.rules
 
 
+@supress_rdlogger()
 def tree_frags_from_mol(mol, prioritization_rules=None):
     """Generate a scaffold tree from a single molecule without using networkx.
 
@@ -141,7 +141,6 @@ def tree_frags_from_mol(mol, prioritization_rules=None):
     >>> frags = tree_frags_from_mol(molecule)
 
     """
-    rdlogger.setLevel(4)
     scaffold = Scaffold(get_murcko_scaffold(mol))
     rdmolops.RemoveStereochemistry(scaffold.mol)
     parents = [scaffold]
@@ -158,6 +157,5 @@ def tree_frags_from_mol(mol, prioritization_rules=None):
             _next_scaffold(next_parent)
 
     _next_scaffold(scaffold)
-    rdlogger.setLevel(3)
 
     return [p.mol for p in parents]
