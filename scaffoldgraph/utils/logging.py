@@ -78,7 +78,7 @@ def suppress_rdlogger(
 
     def decorator(func):
         @functools.wraps(func)
-        def wrap_supress(*args, **kwargs):
+        def wrap_suppress(*args, **kwargs):
             # rdkit version compatability.
             prior_status = DEFAULT_RDLOGGER_STATUS
             if rdversion >= '2020.09.01':
@@ -91,5 +91,5 @@ def suppress_rdlogger(
                 raise e
             set_rdlogger_status(prior_status)
             return result
-        return wrap_supress
+        return wrap_suppress
     return decorator
