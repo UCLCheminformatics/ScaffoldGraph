@@ -36,7 +36,7 @@ def set_rdlogger_status(status_dict):
             rdBase.DisableLog(level)
 
 
-def supress_rdlogger(
+def suppress_rdlogger(
         suppress_info=True,
         suppress_warning=True,
         suppress_error=True,

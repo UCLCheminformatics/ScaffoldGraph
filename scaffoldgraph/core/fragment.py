@@ -27,7 +27,7 @@ from rdkit.Chem import (
 )
 
 from scaffoldgraph.core.scaffold import Scaffold
-from scaffoldgraph.utils import supress_rdlogger
+from scaffoldgraph.utils import suppress_rdlogger
 
 
 class Fragmenter(ABC):
@@ -665,7 +665,7 @@ def get_annotated_murcko_scaffold(mol, scaffold=None, as_mol=True):
     return MolToSmiles(annotated)
 
 
-@supress_rdlogger()
+@suppress_rdlogger()
 def get_next_murcko_fragments(murcko_scaffold, break_fused_rings=True):
     """
     Fragment a scaffold into its next set of Murcko fragments.
@@ -695,7 +695,7 @@ def get_next_murcko_fragments(murcko_scaffold, break_fused_rings=True):
 
 
 # fragmenter is hierarchical so all fragments may not be returned (fix?).
-@supress_rdlogger()
+@suppress_rdlogger()
 def get_all_murcko_fragments(mol, break_fused_rings=True):
     """
     Get all possible murcko fragments from a molecule through

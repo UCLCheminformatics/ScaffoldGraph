@@ -19,7 +19,7 @@ from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings
 
 from scaffoldgraph.io import *
-from scaffoldgraph.utils import canonize_smiles, supress_rdlogger
+from scaffoldgraph.utils import canonize_smiles, suppress_rdlogger
 
 from .fragment import (
     get_murcko_scaffold,
@@ -146,7 +146,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         self.graph.setdefault('num_filtered', 0)  # track number of filtered mols.
         self.fragmenter = fragmenter
 
-    @supress_rdlogger()
+    @suppress_rdlogger()
     def _construct(self, molecules, init_args, ring_cutoff=10, progress=False):
         """Private method for graph construction, called by constructors.
 
