@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 
 from loguru import logger
 
-from rdkit import RDLogger
 from rdkit.Chem import (
     Mol,
     Atom,

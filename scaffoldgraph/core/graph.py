@@ -13,7 +13,6 @@ import gzip
 from loguru import logger
 from tqdm.auto import tqdm
 
-from rdkit import RDLogger
 from rdkit import __version__ as rdversion
 from rdkit.Chem import rdMolHash, MolToSmiles, rdmolops
 from rdkit.Chem.rdMolDescriptors import CalcNumRings

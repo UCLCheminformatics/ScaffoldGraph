@@ -2,7 +2,6 @@
 scaffoldgraph.tree
 """
 
-from rdkit import RDLogger
 from rdkit.Chem import rdmolops
 
 from .core import ScaffoldGraph, Scaffold, MurckoRingFragmenter
