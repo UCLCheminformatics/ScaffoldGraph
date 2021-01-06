@@ -2,8 +2,9 @@
 scaffoldgraph.vis
 """
 
-from .utils import embed_node_mol_images
+from .utils import embed_node_mol_images, remove_node_mol_images
 
 __all__ = [
-    'embed_node_mol_images'
+    'embed_node_mol_images',
+    'remove_node_mol_images',
 ]
