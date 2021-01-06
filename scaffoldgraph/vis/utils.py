@@ -2,6 +2,9 @@
 scaffoldgraph.vis.utils
 """
 
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit import Chem
 
@@ -115,6 +118,140 @@ def remove_node_mol_images(graph):
     """
     for node, data in graph.nodes(data=True):
         _ = data.pop('img', None)
+
+
+def rgba_to_hex(scalar_mappable, value):
+    """str: rgba to hex."""
+    rgba = scalar_mappable.to_rgba(value)
+    c_hex = mpl.colors.to_hex(rgba, keep_alpha=False)
+    return c_hex
+
+
+def cmap_to_scalar_mappable(cmap, vmin, vmax):
+    """Convert matplotlib Colormap to a ScalarMappable.
+
+    Parameters
+    ----------
+    cmap : matplotlib.colors.Colormap
+    vmin : float
+        Minimum value for normalization.
+    vmax : float
+        Maximum value for normalization.
+
+    Returns
+    -------
+    matplolib.cm.ScalarMappable
+
+    """
+    cnorm = mpl.colors.Normalize(vmin, vmax)
+    scalar = mpl.cm.ScalarMappable(norm=cnorm, cmap=cmap)
+    return scalar
+
+
+def color_nodes_by_attribute(graph, attribute, cmap, node_type, label='color'):
+    """
+    Add an attribute to nodes in a ScaffoldGraph containing a color hex code,
+    calculated from a paticular node attribute and a matplotlib cmap. The
+    operation is perfomred in-place.
+
+    Can be used for adding colors to ScaffoldGraph visualizations.
+
+    Parameters
+    ----------
+    graph : ScaffoldGraph
+        Input ScaffoldGraph
+    attribute : str
+        Key for the attibute from which to calculate a color.
+    cmap : str or matplotlib.colors.Colormap
+        A matplotlib cmap or name of a cmap e.g. 'BuPu' for
+        calculating a nodes colour.
+    node_type : str
+        The type of node to process e.g. 'scaffold' / 'molecule'
+    label : str, optional
+        The attribute label to use for storing the color.
+        The default is 'color'.
+
+    """
+    # Cmap may be a string or a Colormap
+    if isinstance(cmap, str):
+        cmap = plt.get_cmap(cmap)
+    else:
+        if not issubclass(type(cmap), mpl.colors.Colormap):
+            raise ValueError('cmap must be a string or a matplotlib Colormap')
+
+    # Get attribute range.
+    _, attr = zip(*graph._get_nodes_with_type(node_type, attribute, None))
+    attr = list(filter(lambda x: x is not None, attr))
+    attr = list(map(float, attr))
+    vmin, vmax = min(attr), max(attr)
+
+    # Assign colors to each node.
+    scalar_mappable = cmap_to_scalar_mappable(cmap, vmin, vmax)
+    for node, data in graph._get_nodes_with_type(node_type, True, None):
+        attr_val = data.get(attribute, None)
+        if not attr_val:
+            color = '#EEEEEE'  # Set a neutral default.
+        else:
+            color = rgba_to_hex(scalar_mappable, attr_val)
+        data[label] = color
+
+
+def color_scaffold_nodes_by_attribute(graph, attribute, cmap, label='color'):
+    """
+    Add an attribute to scaffold nodes in a ScaffoldGraph containing a color hex code,
+    calculated from a paticular scaffold node attribute and a matplotlib cmap. The
+    operation is perfomred in-place.
+
+    Can be used for adding colors to ScaffoldGraph visualizations.
+
+    Parameters
+    ----------
+    graph : ScaffoldGraph
+        Input ScaffoldGraph
+    attribute : str
+        Key for the attibute from which to calculate a color.
+    cmap : str or matplotlib.colors.Colormap
+        A matplotlib cmap or name of a cmap e.g. 'BuPu' for
+        calculating a nodes colour.
+    label : str, optional
+        The attribute label to use for storing the color.
+        The default is 'color'.
+
+    See Also
+    --------
+    color_molecule_nodes_by_attribute
+
+    """
+    color_nodes_by_attribute(graph, attribute, cmap, 'scaffold', label)
+
+
+def color_molecule_nodes_by_attribute(graph, attribute, cmap, label='color'):
+    """
+    Add an attribute to molecule nodes in a ScaffoldGraph containing a color hex code,
+    calculated from a paticular molecule node attribute and a matplotlib cmap. The
+    operation is perfomred in-place.
+
+    Can be used for adding colors to ScaffoldGraph visualizations.
+
+    Parameters
+    ----------
+    graph : ScaffoldGraph
+        Input ScaffoldGraph
+    attribute : str
+        Key for the attibute from which to calculate a color.
+    cmap : str or matplotlib.colors.Colormap
+        A matplotlib cmap or name of a cmap e.g. 'BuPu' for
+        calculating a nodes colour.
+    label : str, optional
+        The attribute label to use for storing the color.
+        The default is 'color'.
+
+    See Also
+    --------
+    color_scaffold_nodes_by_attribute
+
+    """
+    color_nodes_by_attribute(graph, attribute, cmap, 'molecule', label)
 
 
 def add_root_node(graph):
