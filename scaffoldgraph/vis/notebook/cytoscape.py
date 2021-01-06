@@ -89,7 +89,7 @@ class CytoscapeVisualizer(Visualizer):
     >>> visualizer.draw_for_scaffold('c1ccc(CNc2ccccc2)cc1')
 
     """
-    def __init__(self, graph, style=None):
+    def __init__(self, graph, style=None, refresh_images=False):
         """Initialize the cytoscape visualizer.
 
         Parameters
@@ -102,9 +102,17 @@ class CytoscapeVisualizer(Visualizer):
             see the ipycytoscape documentation. If None
             a default style is used and can be updated
             after initialization.
+        refresh_images: bool, optional
+            If True remove all embeded images from the
+            input graph and regenerate when required.
+            The default is False.
 
         """
-        super(CytoscapeVisualizer, self).__init__(graph, requires_tree=False)
+        super(CytoscapeVisualizer, self).__init__(
+            graph,
+            requires_tree=False,
+            refresh_images=refresh_images,
+        )
         self._style = style if style else read_style_file(DEFAULT_STYLE)
 
     @property

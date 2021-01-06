@@ -9,6 +9,8 @@ from abc import ABC
 from scaffoldgraph.core import ScaffoldGraph
 from scaffoldgraph.utils import canonize_smiles
 
+from .utils import remove_node_mol_images
+
 
 class Visualizer(ABC):
     """Base class for ScaffoldGraph visualizers.
@@ -21,7 +23,7 @@ class Visualizer(ABC):
     scaffoldgraph.vis.notebook.cytoscape.CytoscapeVisualizer
 
     """
-    def __init__(self, graph, requires_tree=False):
+    def __init__(self, graph, requires_tree=False, refresh_images=False):
         """Initialize the visualizer.
 
         Parameters
@@ -31,9 +33,14 @@ class Visualizer(ABC):
         requires_tree : bool, optional
             Whether the visualizer requires a tree
             structure to create a visualization.
+        refresh_images: bool, optional
+            If True remove all embeded images from the
+            input graph and regenerate when required.
+            The default is False.
 
         """
         self._requires_tree = requires_tree
+        self._refresh = refresh_images
         self._graph = self._validate_graph(graph)
 
     @property
@@ -56,6 +63,8 @@ class Visualizer(ABC):
                 msg = '{} requires a tree/forest structured graph'
                 msg.format(self.__class__.__name__)
                 raise ValueError(msg)
+        if self._refresh is True:
+            remove_node_mol_images(graph)
         return graph
 
     def _subgraph_from_mol(self, molecule):
