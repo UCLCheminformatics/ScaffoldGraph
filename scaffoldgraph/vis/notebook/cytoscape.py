@@ -89,7 +89,14 @@ class CytoscapeVisualizer(Visualizer):
     >>> visualizer.draw_for_scaffold('c1ccc(CNc2ccccc2)cc1')
 
     """
-    def __init__(self, graph, style=None, refresh_images=False):
+    def __init__(
+            self,
+            graph,
+            style=None,
+            refresh_images=False,
+            rd_draw_options=None,
+            mol_img_size=(350, 300),
+    ):
         """Initialize the cytoscape visualizer.
 
         Parameters
@@ -106,6 +113,15 @@ class CytoscapeVisualizer(Visualizer):
             If True remove all embeded images from the
             input graph and regenerate when required.
             The default is False.
+        rd_draw_options: rdkit.Chem.Draw.rdMolDraw2D.MolDrawOptions, optional
+            Specify options for molecule drawing. Requires a
+            `MolDrawOptions` object or `None`.
+            The default is None.
+        mol_img_size: tuple, optional
+            Specify the size of the node images. Format is
+            `(width, height)`. Note that if changed from
+            default the style will have to be updated.
+            The default is `(350, 300)`.
 
         """
         super(CytoscapeVisualizer, self).__init__(
@@ -113,6 +129,8 @@ class CytoscapeVisualizer(Visualizer):
             requires_tree=False,
             refresh_images=refresh_images,
         )
+        self._drawopts = rd_draw_options
+        self._img_size = mol_img_size
         self._style = style if style else read_style_file(DEFAULT_STYLE)
 
     @property
@@ -135,7 +153,11 @@ class CytoscapeVisualizer(Visualizer):
         """Private: create the cytoscape widget from a subgraph."""
         if subgraph.number_of_nodes() >= 100:
             warnings.warn('graphs with > 100 nodes may be slow to render')
-        embed_node_mol_images(subgraph)
+        embed_node_mol_images(
+            subgraph,
+            size=self._img_size,
+            draw_options=self._drawopts,
+        )
         layout = {}
         layout.update(DEFAULT_LAYOUT)
         if layout_kwargs:
