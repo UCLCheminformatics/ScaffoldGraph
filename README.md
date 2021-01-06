@@ -45,26 +45,27 @@
 * Scaffold Hunter (SH) (Wetzel, 2009)
 * Scaffold Tree Generator (STG) (SH CLI predecessor)
 
-|                                      | SG          | SNG         | SH          | STG         |
-|--------------------------------------|-------------|-------------|-------------|-------------|
-| Computes Scaffold Networks           | X           | X           | -           | -           |
-| Computes HierS Networks              | X           | -           | -           | -           |
-| Computes Scaffold Trees              | X           | X           | X           | X           |
-| Command Line Interface               | X           | X           | -           | X           |
-| Graphical Interface                  | -           | -           | X           | -           |
-| Accessible Library                   | X           | -           | -           | -           |
-| Results can be computed in parallel  | X           | X           | -           | -           |
-| Benchmark for 150,000 molecules `*`  | 15m 25s     | 27m 6s      | -           | -           |
-| Limit on input molecules             | N/A `**`    | 10,000,000  | 200,000`***`| 10,000,000  |
+|                                      | SG          | SNG         | SH            | STG         |
+|--------------------------------------|-------------|-------------|---------------|-------------|
+| Computes Scaffold Networks           | X           | X           | -             | -           |
+| Computes HierS Networks              | X           | -           | -             | -           |
+| Computes Scaffold Trees              | X           | X           | X             | X           |
+| Command Line Interface               | X           | X           | -             | X           |
+| Graphical Interface `*`              | -           | -           | X             | -           |
+| Accessible Library                   | X           | -           | -             | -           |
+| Results can be computed in parallel  | X           | X           | -             | -           |
+| Benchmark for 150,000 molecules `**` | 15m 25s     | 27m 6s      | -             | -           |
+| Limit on input molecules             | N/A `***`   | 10,000,000  | 200,000 `****`| 10,000,000  |
 
+`*` While ScaffoldGraph has no explicit GUI, it contains functions for interactive scaffoldgraph visualization.
 
-`*` Tests performed on an Intel Core i7-6700 @ 3.4 GHz with 32GB of RAM, without parallel processing. I could not find 
+`**` Tests performed on an Intel Core i7-6700 @ 3.4 GHz with 32GB of RAM, without parallel processing. I could not find 
 the code for STG and do not intend to search for it, SNG report that both itself and SH are both faster in the
 benchmark test.
 
-`**` Limited by available memory
+`***` Limited by available memory
 
-`***` Graphical interface has an upper limit of 2,000 scaffolds
+`****` Graphical interface has an upper limit of 2,000 scaffolds
 
 --------------------------------------------------------------------------------
 
