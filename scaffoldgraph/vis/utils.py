@@ -104,6 +104,19 @@ def embed_node_mol_images(graph, size=(350, 300), draw_options=None, skip_existi
             data['img'] = ''
 
 
+def remove_node_mol_images(graph):
+    """Remove embeded images from a graph.
+
+    Parameters
+    ----------
+    graph : ScaffoldGraph
+        Input ScaffoldGraph
+
+    """
+    for node, data in graph.nodes(data=True):
+        _ = data.pop('img', None)
+
+
 def add_root_node(graph):
     """Add a root node to a scaffoldgraph.
 
