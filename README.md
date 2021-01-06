@@ -51,7 +51,7 @@
 | Computes HierS Networks              | X           | -           | -             | -           |
 | Computes Scaffold Trees              | X           | X           | X             | X           |
 | Command Line Interface               | X           | X           | -             | X           |
-| Graphical Interface `*`              | -           | -           | X             | -           |
+| Graphical Interface                  | - `*`       | -           | X             | -           |
 | Accessible Library                   | X           | -           | -             | -           |
 | Results can be computed in parallel  | X           | X           | -             | -           |
 | Benchmark for 150,000 molecules `**` | 15m 25s     | 27m 6s      | -             | -           |
