@@ -9,7 +9,7 @@
       "shape": "rectangle",
       "width": 350,
       "height": 300,
-      "background-color": "#9dbaea",
+      "background-color": "#EEEEEE",
       "background-fit": "contain",
       "background-image": "data(img)",
       "text-outline-width": 2,
@@ -20,7 +20,7 @@
     "selector": "node[type='molecule']",
     "style": {
       "content": "data(id)",
-      "background-color": "black"
+      "background-color": "#EEEEEE"
     }
   },
   {
