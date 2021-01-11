@@ -5,7 +5,7 @@ scaffoldgraph tests.utils.test_aggregate
 import scaffoldgraph as sg
 
 from scaffoldgraph.utils import aggregate
-from .. import mock_sdf, mock_sdf_2
+from . import mock_sdf, mock_sdf_2
 
 
 def test_aggregate(sdf_file, sdf_file_2):
