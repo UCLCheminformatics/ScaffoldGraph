@@ -71,7 +71,7 @@ benchmark test.
 
 ## Installation
 
-- ScaffoldGraph currently only supports Python 3
+- ScaffoldGraph currently supports Python 3.6 and above.
 
 ### Install with conda (recommended)
 ```
