@@ -83,11 +83,12 @@ def calc_scaffold_enrichment(scaffoldgraph, activity, mode='ks', alternative='gr
         Kolmogorov-Smirnov test and 'b' or 'binomial' specifies a binomial test.
         The default is 'ks'.
     alternative : {'two-sided', 'less', 'greater'}, optional
-        Defines the alternative hypothesis.
-        The following options are available:
+        Defines the alternative hypothesis. The following options are available:
+
           * 'two-sided'
           * 'less': one-sided
           * 'greater': one-sided
+
         The default is 'greater'.
     p : float, None, optional
         The hypothesized probability of success. 0 <= p <= 1. Used in binomial mode.
@@ -140,11 +141,12 @@ def compound_set_enrichment(scaffoldgraph, activity, mode='ks', alternative='gre
         Kolmogorov-Smirnov test and 'b' or 'binomial' specifies a binomial test.
         The default is 'ks'.
     alternative : {'two-sided', 'less', 'greater'}, optional
-        Defines the alternative hypothesis.
-        The following options are available:
+        Defines the alternative hypothesis. The following options are available:
+
           * 'two-sided'
           * 'less': one-sided
           * 'greater': one-sided
+
         The default is 'greater'.
     crit : float, optional
         The critical significance level. The default is 0.01

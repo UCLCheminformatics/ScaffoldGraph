@@ -242,9 +242,9 @@ def get_over_represented_scaffold_classes(scaffoldgraph, threshold=0.80, member_
 
     The HierS paper uses three defined similarity thresholds (APS) in three categories:
 
-        loose  = 0.75
-        medium = 0.80
-        strict = 0.85
+        * loose  = 0.75
+        * medium = 0.80
+        * strict = 0.85
 
     Parameters
     ----------
@@ -258,7 +258,7 @@ def get_over_represented_scaffold_classes(scaffoldgraph, threshold=0.80, member_
     skip_aps : bool, optional
         If True the function assumes that the APS has already been calculated and 'members' and
         'aps' are scaffold node attributes (i.e. use if running the same function more than
-         once with different thresholds). The default is False.
+        once with different thresholds). The default is False.
     **kwargs :
         Arguments for the calc_average_pairwise_similarity function (calculating the APS metric).
 
