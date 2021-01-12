@@ -1,16 +1,17 @@
 """
 scaffoldgraph.prioritization.generic_rules
 
-Generic rules for defining custom rulesets* for prioritizing
+Generic rules for defining custom rulesets for prioritizing
 scaffolds during scaffold tree construction.
 
-*scaffoldgraph.prioritization.prioritization_ruleset.ScaffoldRuleSet
+* scaffoldgraph.prioritization.prioritization_ruleset.ScaffoldRuleSet
 
 Rule Prefix definitions:
 ------------------------
-SCP - Scaffold property (parent scaffold)
-RRP - Removed ring property
-RSP - Property of ring system of removed ring before removal
+* SCP - Scaffold property (parent scaffold)
+* RRP - Removed ring property
+* RSP - Property of ring system of removed ring before removal
+
 """
 
 from rdkit.Chem import MolFromSmarts

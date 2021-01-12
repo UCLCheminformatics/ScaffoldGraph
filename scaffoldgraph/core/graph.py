@@ -81,6 +81,9 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         A ``scaffoldgraph.core.fragment.Fragmenter`` class for producing
         the next scaffold set for a given molecular input.
 
+    Notes
+    -----
+
     **Subclasses:**
 
     In scaffoldgraph all ScaffoldGraphs (e.g. ``ScaffoldNetwork``) inherit from
@@ -89,24 +92,24 @@ class ScaffoldGraph(nx.DiGraph, ABC):
     represents a different way of constructing the graph. This can be customized
     in a few ways:
 
-        Implementing the _hierarchy_constructor function. This function
-        is responsible for taking the next set of fragments and building
-        the graph structure (subclasses must implment this function). For
-        example in the ScaffoldTree class the funtion uses a prioritization
-        system for determining which scaffold to add to the graph. This
-        function MUST be implemented.
+        * Implementing the _hierarchy_constructor function. This function
+          is responsible for taking the next set of fragments and building
+          the graph structure (subclasses must implment this function). For
+          example in the ScaffoldTree class the funtion uses a prioritization
+          system for determining which scaffold to add to the graph. This
+          function MUST be implemented.
 
-        By providing a ``Fragmenter`` callable to produce the next set of
-        scaffolds to be added to the graph, the way in which scaffolds are
-        fragmented can be customized.
+        * By providing a ``Fragmenter`` callable to produce the next set of
+          scaffolds to be added to the graph, the way in which scaffolds are
+          fragmented can be customized.
 
-        By mofifying scaffold initilaization. Scaffold initilization can be customized
-        by mofifying the functions; _initialize_scaffold and _preprocess_scaffold.
-        _initialize scaffold is responsible for creating the top-level scaffold
-        and adding the molecule node, scaffold node and connecting these via an edge.
-        The _initialize_scaffold function also calls the _preprocess_scaffold function
-        which contains optional methods for preprocessing scaffolds, i.e. removing
-        specific isotopes.
+        * By mofifying scaffold initilaization. Scaffold initilization can be customized
+          by mofifying the functions; _initialize_scaffold and _preprocess_scaffold.
+          _initialize scaffold is responsible for creating the top-level scaffold
+          and adding the molecule node, scaffold node and connecting these via an edge.
+          The _initialize_scaffold function also calls the _preprocess_scaffold function
+          which contains optional methods for preprocessing scaffolds, i.e. removing
+          specific isotopes.
 
     See Also
     --------
@@ -270,7 +273,7 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         return scaffold_rdmol
 
     def _process_no_top_level(self, molecule):
-        """Private: Process molecules with no top-level scaffold.
+        """Process molecules with no top-level scaffold.
 
         Can be overwritten to change the behaviour when a molecule
         does not contain a top-level scaffold (i.e. is linear). By

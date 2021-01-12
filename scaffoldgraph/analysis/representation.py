@@ -160,12 +160,6 @@ def calc_average_pairwise_similarity(scaffoldgraph, fp_func=None, sim_func=None,
     as a metric to gauge scaffold over-representation in a set of compounds as described in the
     HierS paper.
 
-    Notes
-    -----
-    The metric used in the HierS implementation is called APT (Average Pairwise Tanimoto).
-    In this implementation it is known as 'APS', as the function enables the user to specify
-    similarity metrics other than Tanimoto using the `sim_func` argument.
-
     Parameters
     ----------
     scaffoldgraph : ScaffoldGraph
@@ -189,6 +183,12 @@ def calc_average_pairwise_similarity(scaffoldgraph, fp_func=None, sim_func=None,
         A dict of dicts in the format {scaffold: {members, aps}} where members is the
         number of molecules in the scaffold cluster and aps is the average pairwise
         similarity of the molecules in the cluster.
+
+    Notes
+    -----
+    The metric used in the HierS implementation is called APT (Average Pairwise Tanimoto).
+    In this implementation it is known as 'APS', as the function enables the user to specify
+    similarity metrics other than Tanimoto using the `sim_func` argument.
 
     See Also
     --------
