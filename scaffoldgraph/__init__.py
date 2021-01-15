@@ -7,6 +7,7 @@ from loguru import logger
 from . import prioritization
 from . import analysis
 from . import utils
+from . import vis
 
 from .core import (
     get_next_murcko_fragments,
