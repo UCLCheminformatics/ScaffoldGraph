@@ -118,7 +118,7 @@ class HierS(ScaffoldGraph):
     >>> network.num_scaffold_nodes
     92
 
-    Create a HierS netwoek from an SDF.
+    Create a HierS network from an SDF.
 
     >>> network = sg.HierS.from_sdf('my_file.sdf', progress=True)
 

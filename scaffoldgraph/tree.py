@@ -127,7 +127,7 @@ def tree_frags_from_mol(mol, prioritization_rules=None):
 
     Returns
     -------
-    parents
+    parents : list
         An ordered list of rdkit Mols representing a scaffold tree.
 
     Examples

@@ -5,6 +5,7 @@ scaffoldgraph
 from loguru import logger
 
 from . import prioritization
+from . import analysis
 from . import utils
 
 from .core import (

@@ -4,6 +4,11 @@ scaffoldgraph.analysis.representation
 Module contains general functions for scaffold analysis
 """
 
+__all__ = [
+    'get_virtual_scaffolds',
+    'get_singleton_scaffolds',
+]
+
 
 def get_virtual_scaffolds(scaffoldgraph):
     """Get 'virtual' scaffolds in within a scaffold graph.

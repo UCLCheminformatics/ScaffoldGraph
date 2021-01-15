@@ -6,7 +6,7 @@ import pytest
 import networkx as nx
 import random
 
-from scaffoldgraph.analysis import calc_scaffold_enrichment, compound_set_enrichment
+from scaffoldgraph.analysis.enrichment import calc_scaffold_enrichment, compound_set_enrichment
 from ..test_network import long_test_network
 
 
