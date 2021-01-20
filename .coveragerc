@@ -1,0 +1,9 @@
+[run]
+omit =
+    scaffoldgraph/vis/notebook/*,
+    scaffoldgraph/scripts/misc.py,
+
+[report]
+exclude_lines =
+    pragma: no cover
+    logger.*

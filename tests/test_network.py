@@ -83,7 +83,7 @@ def test_traversal(network):
 
 
 def test_separate_disconnected(network):
-    assert len(network.separate_disconnected_components()) == 2
+    assert len(network.separate_disconnected_components(sort=True)) == 2
     assert type(network.separate_disconnected_components()[0]) == type(network)
 
 
