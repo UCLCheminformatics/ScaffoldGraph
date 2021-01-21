@@ -17,7 +17,9 @@ from rdkit.Chem import (
     BondType,
     GetSymmSSSR,
     RemoveHs,
+    Descriptors,
     MurckoDecompose,
+    MolStandardize,
     CHI_UNSPECIFIED,
     SANITIZE_ALL,
     SANITIZE_CLEANUP,
@@ -459,19 +461,73 @@ def keep_largest_fragment(mol):
     return max(frags, key=lambda x: x.GetNumAtoms())
 
 
-def discharge_and_deradicalize(mol):
-    """Discharge and remove radicals (brute force).
-
-    This operation is performed in-place.
+def convert_radicals_to_hydrogen(mol):
+    """Converts radical electrons in a molecule into bonds to hydrogens.
 
     Parameters
     ----------
     mol : rdkit.Chem.rdchem.Mol
 
+    Returns
+    -------
+    mol : rdkit.Chem.rdchem.Mol
+        New molecule with radical electrons converted into
+        bonds to hydrogens.
+
     """
-    for atom in mol.GetAtoms():
-        atom.SetFormalCharge(0)
-        atom.SetNumRadicalElectrons(0)
+    m = Mol(mol)
+    if Descriptors.NumRadicalElectrons(m) == 0:
+        return m
+    else:
+        for atom in m.GetAtoms():
+            nradicals = atom.GetNumRadicalElectrons()
+            if nr > 0:
+                atom.SetNumRadicalElectrons(0)
+                atom.SetNumExplicitHs(nradicals)
+    return m
+
+
+@suppress_rdlogger()
+def discharge_molecule(mol):
+    """Discharge molecules using the RDKit Uncharger class.
+
+    Uncharges molecules by adding and/or removing hydrogens.
+    For zwitterions, hydrogens are moved to eliminate charges where possible.
+    In cases where there is a positive charge that is not neutralizable,
+    an attempt is made to also preserve the corresponding negative charge.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    mol : rdkit.Chem.rdchem.Mol
+        New molecule with charges eliminated where possible.
+
+    """
+    uncharger = MolStandardize.charge.Uncharger()
+    out = uncharger.uncharge(mol)
+    return out
+
+
+def discharge_and_deradicalize(mol):
+    """Discharge and remove radicals.
+
+    Parameters
+    ----------
+    mol : rdkit.Chem.rdchem.Mol
+
+    Returns
+    -------
+    mol : rdkit.Chem.rdchem.Mol
+        New molecule with charges eliminated where possible
+        and radicals removed.
+
+    """
+    out = convert_radicals_to_hydrogen(mol)
+    out = discharge_molecule(out)
+    return out
         
 
 def remove_exocyclic_attachments(mol):
