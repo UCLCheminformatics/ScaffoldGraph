@@ -6,6 +6,7 @@ from loguru import logger
 
 from . import prioritization
 from . import utils
+from . import vis
 
 from .core import (
     get_next_murcko_fragments,
@@ -18,7 +19,7 @@ from .core import (
 from .network import ScaffoldNetwork, HierS
 from .tree import ScaffoldTree, tree_frags_from_mol
 
-__version__ = '1.0.4'
+__version__ = '1.1.0'
 
 
 __all__ = [
