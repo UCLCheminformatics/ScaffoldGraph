@@ -24,6 +24,7 @@ requirements:
     - python
     - rdkit
     - networkx
+    - matplotlib
     - loguru
     - tqdm
     - scipy >=1.3.1
