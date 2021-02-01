@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 8c026e7d048fc4ddb5a5b11aa7ef8cc8648dbe0988b47ee2626087a548a7064f
+  sha256: 3e1ac1def06b92c673eb83152427c56b8553d3f6cc02738dbc1563ea833f1ca7
 
 build:
   noarch: python
