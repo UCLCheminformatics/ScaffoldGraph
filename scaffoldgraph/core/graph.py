@@ -421,13 +421,20 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         """int : Return the smallest hierarchy level"""
         return min(self.get_hierarchy_sizes())
 
-    def get_scaffolds_in_hierarchy(self, hierarchy):
+    def get_scaffolds_in_hierarchy(self, hierarchy, data=False, default=None):
         """Return a generator of all scaffolds within a specified hierarchy.
 
         Parameters
         ----------
         hierarchy : int
             The hierarchy level to retrieve.
+        data : str, bool, optional
+            The scaffold node attribute returned in 2-tuple (n, ddict[data]).
+            If True, return entire node attribute dict as (n, ddict).
+            If False, return just the nodes n. The default is False.
+        default : value, bool, optional
+            Value used for nodes that don't have the requested attribute.
+            Only relevant if data is not True or False.
 
         Returns
         -------
@@ -438,7 +445,12 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         """
         for s, d in self.get_scaffold_nodes(data=True):
             if d['hierarchy'] == int(hierarchy):
-                yield s
+                if data is False:
+                    yield s
+                elif data is True:
+                    yield (s, d)
+                else:
+                    yield (s, d.get(data, default))
 
     def scaffold_in_graph(self, scaffold_smiles):
         """Returns True if the specified scaffold SMILES is in the scaffold graph.
