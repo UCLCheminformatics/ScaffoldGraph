@@ -59,6 +59,26 @@ def reset_rdlogger():
     set_rdlogger_status(DEFAULT_RDLOGGER_STATUS)
 
 
+def set_rdlogger_debug_status(status):
+    """Set status of rdlogger: debug."""
+    set_rdlogger_status({'rdApp.debug': status})
+
+
+def set_rdlogger_info_status(status):
+    """Set status of rdlogger: info."""
+    set_rdlogger_status({'rdApp.info': status})
+
+
+def set_rdlogger_warning_status(status):
+    """Set status of rdlogger: warning."""
+    set_rdlogger_status({'rdApp.warning': status})
+
+
+def set_rdlogger_error_status(status):
+    """Set status of rdlogger: error."""
+    set_rdlogger_status({'rdApp.error': status})
+
+
 def suppress_rdlogger(
         suppress_info=True,
         suppress_warning=True,
