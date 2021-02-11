@@ -5,6 +5,7 @@ Utilities for dealing with rdkit logging.
 """
 
 import functools
+import warnings
 
 from rdkit import __version__ as rdversion
 from rdkit import RDLogger, rdBase
@@ -17,10 +18,22 @@ DEFAULT_RDLOGGER_STATUS = {
     'rdApp.error': True
 }
 
+QUIET_RDLOGGER_STATUS = {
+    'rdApp.debug': False,
+    'rdApp.info': False,
+    'rdApp.warning': False,
+    'rdApp.error': True
+}
+
+UNKNOWN_RDLOGGER_STATUS = DEFAULT_RDLOGGER_STATUS
+
 
 def get_rdlogger_status():
     """dict : Return the status of the rdlogger."""
     status_dict = {}
+    if rdversion < '2020.09.01':
+        warnings.warn('Failed to get status of rdlogger')
+        return UNKNOWN_RDLOGGER_STATUS
     for status in rdBase.LogStatus().split('\n'):
         level, state = status.split(':')
         status_dict[level] = True if state == 'enabled' else False
@@ -34,6 +47,16 @@ def set_rdlogger_status(status_dict):
             rdBase.EnableLog(level)
         else:
             rdBase.DisableLog(level)
+
+
+def set_rdlogger_quiet():
+    """Set the rdlogger to quiet status."""
+    set_rdlogger_status(QUIET_RDLOGGER_STATUS)
+
+
+def reset_rdlogger():
+    """Reset the rdlogger status to default."""
+    set_rdlogger_status(DEFAULT_RDLOGGER_STATUS)
 
 
 def suppress_rdlogger(
