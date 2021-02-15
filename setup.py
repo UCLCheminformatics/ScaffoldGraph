@@ -67,6 +67,7 @@ setup(
     setup_requires=setup_requires,
     tests_require=tests_require,
     entry_points=entry_points,
+    include_package_data=True,
     packages=find_packages(
         exclude=['tests.*', 'tests']
     ),
