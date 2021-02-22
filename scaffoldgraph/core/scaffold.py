@@ -8,6 +8,14 @@ import weakref
 
 from rdkit.Chem import MolToSmiles, MolFromSmiles, BondType, GetSymmSSSR
 
+try:
+    kernel_name = get_ipython().__class__.__name__
+    if kernel_name == 'ZMQInteractiveShell':
+        from rdkit.Chem.Draw import IPythonConsole
+        from rdkit.Chem import Draw
+except ImportError:
+    pass
+
 
 class Scaffold(object):
     """A convenience class for defining scaffolds in scaffoldgraph.
@@ -497,6 +505,29 @@ class Ring(object):
         """Returns the size of the ring (number of atoms)."""
         return len(self.aix)
 
+    def _repr_png_(self):
+        """Return PNG representation of the rdkit mol (ring highlighted)."""
+        mol = self.owner.mol
+        keku = IPythonConsole.kekulizeStructures
+        size = IPythonConsole.molSize
+        opts = IPythonConsole.drawOptions
+        return Draw._moltoimg(
+            mol, size, self.aix, "", returnPNG=True, drawOptions=opts,
+            kekulize=keku, highlightBonds=self.bix
+        )
+
+    def _repr_svg_(self):
+        """Return SVG representation of the rdkit mol (ring highlighted)."""
+        if not IPythonConsole.ipython_useSVG:
+            return None
+        mol = self.owner.mol
+        keku = IPythonConsole.kekulizeStructures
+        size = IPythonConsole.molSize
+        opts = IPythonConsole.drawOptions
+        return Draw._moltoSVG(
+            mol, size, self.aix, "", keku, drawOptions=opts, highlightBonds=self.bix
+        )
+
     def __repr__(self):
         return '<{_cls} at {address}>'.format(
             _cls=self.__class__.__name__,
@@ -837,6 +868,29 @@ class RingSystem(object):
 
     def __len__(self):
         return len(self.aix)
+
+    def _repr_png_(self):
+        """Return PNG representation of the rdkit mol (ring highlighted)."""
+        mol = self.owner.mol
+        keku = IPythonConsole.kekulizeStructures
+        size = IPythonConsole.molSize
+        opts = IPythonConsole.drawOptions
+        return Draw._moltoimg(
+            mol, size, self.aix, "", returnPNG=True, drawOptions=opts,
+            kekulize=keku, highlightBonds=self.bix
+        )
+
+    def _repr_svg_(self):
+        """Return SVG representation of the rdkit mol (ring highlighted)."""
+        if not IPythonConsole.ipython_useSVG:
+            return None
+        mol = self.owner.mol
+        keku = IPythonConsole.kekulizeStructures
+        size = IPythonConsole.molSize
+        opts = IPythonConsole.drawOptions
+        return Draw._moltoSVG(
+            mol, size, self.aix, "", keku, drawOptions=opts, highlightBonds=self.bix
+        )
 
     def __repr__(self):
         return '<{_cls} at {address}>'.format(
