@@ -13,7 +13,7 @@ try:
     if kernel_name == 'ZMQInteractiveShell':
         from rdkit.Chem.Draw import IPythonConsole
         from rdkit.Chem import Draw
-except ImportError:
+except NameError:
     pass
 
 
