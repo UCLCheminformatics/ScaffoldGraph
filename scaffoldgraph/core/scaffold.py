@@ -267,6 +267,20 @@ class Scaffold(object):
         """Returns the SMILES string of the molecule."""
         return self.smiles
 
+    def _repr_png_(self):
+        """Return PNG representation of the rdkit mol."""
+        try:
+            return self.mol._repr_png_()
+        except AttributeError:
+            return None
+
+    def _repr_svg_(self):
+        """Return SVG representation of the rdkit mol."""
+        try:
+            return self.mol._repr_svg_()
+        except AttributeError:
+            return None
+
     def __repr__(self):
         return '<{_cls} at {address}>'.format(
             _cls=self.__class__.__name__,
