@@ -218,6 +218,13 @@ class Scaffold(object):
             return self.hash_func(self.mol)
         return self.smiles
 
+    def clear_cached_attribuites(self):
+        """Clear all cached attributes."""
+        setattr(self, '_atoms', None)
+        setattr(self, '_bonds', None)
+        setattr(self, '_rings', None)
+        setattr(self, '_ring_systems', None)
+
     @classmethod
     def from_smiles(cls, smiles, hash_func=None):
         """Construct a Scaffold object from a SMILES string.
@@ -251,10 +258,7 @@ class Scaffold(object):
 
     def __setstate__(self, state):
         self.mol, self.hash_func = state
-        setattr(self, '_atoms', None)
-        setattr(self, '_bonds', None)
-        setattr(self, '_rings', None)
-        setattr(self, '_ring_systems', None)
+        self.clear_cached_attribuites()
 
     def __bool__(self):
         """Returns True if the molecule contains at least 1 atom."""
