@@ -218,7 +218,7 @@ class Scaffold(object):
             return self.hash_func(self.mol)
         return self.smiles
 
-    def clear_cached_attribuites(self):
+    def clear_cached_attributes(self):
         """Clear all cached attributes."""
         setattr(self, '_atoms', None)
         setattr(self, '_bonds', None)
@@ -258,7 +258,7 @@ class Scaffold(object):
 
     def __setstate__(self, state):
         self.mol, self.hash_func = state
-        self.clear_cached_attribuites()
+        self.clear_cached_attributes()
 
     def __bool__(self):
         """Returns True if the molecule contains at least 1 atom."""
