@@ -343,7 +343,7 @@ def collect_linker_atoms(origin, remove_atoms, include_origin=True):
     return ring_attachments
 
 
-def get_scaffold_frags(frag):
+def get_scaffold_frags(frag, hash_func=None):
     """Get fragments from a disconnected structure.
 
     This function is used primarily used during molecular fragmentation.
@@ -352,6 +352,8 @@ def get_scaffold_frags(frag):
     ----------
     frag : rdkit.Chem.rdchem.Mol
         An rdkit Mol containing disconeccted structures.
+    hash_func : callable, optional
+        Scaffold hash function, the default is the canonical smiles.
 
     Returns
     -------
@@ -383,7 +385,7 @@ def get_scaffold_frags(frag):
         # equivalent to the behavior of SNG (I believe...)
         logger.debug(e)
         return set()
-    frags = {Scaffold(f) for f in GetMolFrags(frag, True, False)}
+    frags = {Scaffold(f, hash_func) for f in GetMolFrags(frag, True, False)}
     return frags
 
 
