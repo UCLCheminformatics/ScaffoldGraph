@@ -39,7 +39,7 @@ class Fragmenter(ABC):
     internal state or property used during fragmentation.
 
     Subclasses should define the fragment method which takes a
-    scaffold ``scafooldgraph.core.Scaffold`` as an argument
+    scaffold ``scaffoldgraph.core.Scaffold`` as an argument
     and returns the next set of parent scaffolds after
     fragmentation of the child scaffold. Subclasses may also
     define an __init__ method to supply any arguments which may
