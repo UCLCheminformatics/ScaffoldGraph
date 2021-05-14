@@ -952,7 +952,8 @@ class ScaffoldGraph(nx.DiGraph, ABC):
         df : pd.DataFrame
             A pandas DataFrame containing SMILES strings and a molecule identifier.
         smiles_column : value, optional
-            Label of column containing SMILES strings. The default is 'Smiles'.
+            Label of column containing SMILES strings. The default is 'Smiles'. The
+            column may instead contain precomputed rdkit Mol objects.
         name_column : str
             Label of column containing SMILES strings. The default is 'Name'.
         data_columns : list

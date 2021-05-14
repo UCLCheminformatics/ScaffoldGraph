@@ -4,7 +4,7 @@ scaffoldgraph.io.dataframe
 Contains functions for reading molecules from pandas dataframes.
 """
 
-from rdkit.Chem import MolFromSmiles
+from rdkit.Chem import MolFromSmiles, Mol
 from loguru import logger
 
 
@@ -48,7 +48,10 @@ class DataFrameMolSupplier(object):
     def __next__(self):
         values = next(self.supplier)
         try:
-            mol = MolFromSmiles(values[0])
+            if isinstance(values[0], Mol):
+                mol = values[0]
+            else:
+                mol = MolFromSmiles(values[0])
             mol.SetProp('_Name', str(values[1]))
             if self.data_cols is not None:
                 for key, value in zip(self.data_cols, values[2]):
@@ -75,7 +78,7 @@ def read_dataframe(df, smiles_column, name_column, data_columns=None):
     df : pandas.DataFrame
         Dataframe to read molecules from.
     smiles_column : str
-        Key of column containing SMILES strings.
+        Key of column containing SMILES strings or rdkit Mol objects.
     name_column : str
         Key of column containing molecule name strings.
     data_columns : list, optional
