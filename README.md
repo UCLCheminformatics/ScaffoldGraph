@@ -80,9 +80,22 @@ conda install -c uclcheminformatics scaffoldgraph
 ```
 ### Install with pip
 ```
+# Basic installation.
 pip install scaffoldgraph
+
+# Install with ipycytoscape.
+pip install scaffoldgraph[vis]
+
+# Install with rdkit-pypi (Linux, MacOS).
+pip install scaffoldgraph[rdkit]
+
+# Install with all optional packages. 
+pip install scaffoldgraph[rdkit, vis]
 ```
 __Warning__: rdkit cannot be installed with pip, so must be installed through [other means]('https://www.rdkit.org/docs/Install.html')
+
+__Update (17/06/21)__: rdkit can now be installed through the [rdkit-pypi](https://pypi.org/project/rdkit-pypi/) wheels for
+Linux and MacOS, and can be installed alongside ScaffoldGraph optionally (see above instructions).  
 
 --------------------------------------------------------------------------------
 
@@ -241,6 +254,14 @@ network = sg.ScaffoldNetwork.from_sdf('my_sdf_file.sdf')
 
 # construct a scaffold tree from a SMILES file
 tree = sg.ScaffoldTree.from_smiles('my_smiles_file.smi')
+
+# construct a scaffold tree from a pandas dataframe
+import pandas as pd
+df = pd.read_csv('activity_data.csv')
+network = sg.ScaffoldTree.from_dataframe(
+    df, smiles_column='Smiles', name_column='MolID',
+    data_columns=['pIC50', 'MolWt'], progress=True,
+)
 ```
 
 
