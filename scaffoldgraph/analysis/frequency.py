@@ -88,3 +88,50 @@ def _get_murcko_frequency(scaffoldgraph):
     m = list({next(g.predecessors(x)) for x in mols})
     f = [len([x for x in g.successors(x) if g.nodes[x]['type'] == 'molecule']) for x in m]
     return list(zip(m, f))
+
+
+def area_under_curve(x, y):
+    """Calculate area under the curve using the trapezoidal rule.
+
+    Parameters
+    ----------
+    x : np.ndarray, shape (n, )
+        Array of x coordinates, must be monotonic increasing or decreasing
+    y : np.ndarray, shape (n, )
+        Array of y coordinates
+
+    Returns
+    -------
+    area : float
+        Area under the curve (AUC)
+
+    """
+    x = np.asanyarray(x)
+    y = np.asanyarray(y)
+    if x.shape != y.shape:
+        raise ValueError(
+            'Input arrays are expected to contain the same '
+            f'number of points, x.shape: {x.shape}, '
+            f'y.shape: {y.shape}'
+        )
+    if x.shape[0] < 2:
+        raise ValueError(
+            'At least two points are required to calculate'
+            f' area under the curve, got shape: {x.shape}'
+        )
+    if len(x.shape) != 1:
+        raise ValueError(
+            f'Expected 1d arrays for x and y, got '
+            f'shape: {x.shape}'
+        )
+    direction = 1
+    dx = np.diff(x)
+    if np.any(dx < 0):
+        if np.all(dx < 0):
+            raise ValueError(
+                'x is neither monotonic increasing or'
+                'decreasing'
+            )
+        direction = -1
+    area = direction * np.trapz(y, x)
+    return area

@@ -8,7 +8,7 @@ from .representation import calc_average_pairwise_similarity, get_over_represent
 from .enrichment import calc_scaffold_enrichment, compound_set_enrichment
 from .general import get_virtual_scaffolds, get_singleton_scaffolds
 from .diversity import diversity_pick_for_scaffold_class
-from .frequency import cumulative_scaffold_frequency
+from .frequency import cumulative_scaffold_frequency, area_under_curve
 
 
 __all__ = [
@@ -20,4 +20,5 @@ __all__ = [
     'get_singleton_scaffolds',
     'diversity_pick_for_scaffold_class',
     'cumulative_scaffold_frequency',
+    'area_under_curve'
 ]
