@@ -97,6 +97,11 @@ __Warning__: rdkit cannot be installed with pip, so must be installed through [o
 __Update (17/06/21)__: rdkit can now be installed through the [rdkit-pypi](https://pypi.org/project/rdkit-pypi/) wheels for
 Linux and MacOS, and can be installed alongside ScaffoldGraph optionally (see above instructions).  
 
+__Update (16/11/21)__: Jupyter lab users may also need to follow the extra installation instructions 
+[here](https://github.com/cytoscape/ipycytoscape#for-jupyterlab-1x-or-2x) / [here](https://ipycytoscape.readthedocs.io/en/latest/installing.html) 
+when using the ipycytoscape visualisation utility.
+
+
 --------------------------------------------------------------------------------
 
 ## Quick Start
