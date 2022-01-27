@@ -12,8 +12,7 @@
 [NetworkX](https://networkx.github.io/), for the generation and analysis of scaffold networks and scaffold trees.
 
 <p align="center">
-    <img width="80%", src="https://github.com/UCLCheminformatics/ScaffoldGraph/blob/main/img/scaffoldgraph.jpg?
-raw=true" />
+    <img width="80%", src="https://raw.githubusercontent.com/UCLCheminformatics/ScaffoldGraph/main/img/scaffoldgraph.jpg" />
 </p>
 
 [Features](https://github.com/UCLCheminformatics/ScaffoldGraph#features) | 
